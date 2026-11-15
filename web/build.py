@@ -2,7 +2,7 @@ import base64,re,sys,os
 d=os.path.dirname(os.path.abspath(__file__))
 src=open(os.path.join(d,'src/game.html'),encoding='utf-8').read()
 def b64(p,m):return 'data:%s;base64,'%m+base64.b64encode(open(os.path.join(d,'assets',p),'rb').read()).decode()
-src=src.replace('__EARTH__',b64('earth.jpg','image/jpeg')).replace('__CITY__',b64('city.jpg','image/jpeg')).replace('__SONG__',b64('song.mp3','audio/mpeg')).replace('__EIKO_FLY__',b64('eiko_fly.webp','image/webp')).replace('__EIKO_STAND__',b64('eiko_stand.webp','image/webp')).replace('__MAN_PULL__',b64('man_pull.webp','image/webp')).replace('__MAN_CHEER__',b64('man_cheer.webp','image/webp'))
+src=src.replace('__EARTH__',b64('earth.jpg','image/jpeg')).replace('__CITY__',b64('city.jpg','image/jpeg')).replace('__SONG__',b64('song.mp3','audio/mpeg')).replace('__EIKO_FLY__',b64('eiko_fly.webp','image/webp')).replace('__EIKO_STAND__',b64('eiko_stand.webp','image/webp')).replace('__MAN_S__',b64('man_s.webp','image/webp')).replace('__MAN_F__',b64('man_f.webp','image/webp')).replace('__MAN_FR__',b64('man_fr.webp','image/webp')).replace('__MAN_B__',b64('man_b.webp','image/webp')).replace('__MAN_CHEER__',b64('man_cheer.webp','image/webp'))
 full=re.sub(r'<!--(HEAD|BODY|TAIL)_(START|END)-->','',src)
 open(os.path.join(d,'index.html'),'w',encoding='utf-8').write(full)
 art=re.sub(r'<!--(HEAD|BODY|TAIL)_START-->.*?<!--\1_END-->','',src,flags=re.S)

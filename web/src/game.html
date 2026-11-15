@@ -94,7 +94,7 @@ textarea{width:100%;box-sizing:border-box;min-height:140px;font-size:16px;border
 <div id="load"><div>🌏</div><div id="loadMsg">よみこみ中…</div></div>
 <script>
 (function(){'use strict';
-var ASSET_EARTH='__EARTH__',ASSET_CITY='__CITY__',ASSET_SONG='__SONG__',ASSET_PEOPLE={fly:'__EIKO_FLY__',stand:'__EIKO_STAND__',pull:'__MAN_PULL__',cheer:'__MAN_CHEER__'};
+var ASSET_EARTH='__EARTH__',ASSET_CITY='__CITY__',ASSET_SONG='__SONG__',ASSET_PEOPLE={fly:'__EIKO_FLY__',stand:'__EIKO_STAND__',s:'__MAN_S__',f:'__MAN_F__',fr:'__MAN_FR__',b:'__MAN_B__',cheer:'__MAN_CHEER__'};
 var $=function(id){return document.getElementById(id)};
 var loaded=false;
 function fatal(msg){var l=$('load');l.classList.remove('hide');$('loadMsg').innerHTML='よみこめませんでした<br><small style="font-weight:600">（'+String(msg).replace(/</g,'&lt;')+'）</small><br><small style="font-weight:600">開きなおしてみてね</small>';}
@@ -241,7 +241,7 @@ function proj(lat,lon,la0,lo0,R,cx,cy){
 /* ===== アセット ===== */
 var IM={},imgCity=new Image(),imgEarth=new Image(),nLoaded=0;
 var bgm=null;
-function onAsset(){nLoaded++;if(nLoaded===6)boot()}
+function onAsset(){nLoaded++;if(nLoaded===9)boot()}
 imgCity.onload=onAsset;imgEarth.onload=onAsset;
 imgCity.onerror=imgEarth.onerror=function(){fatal('画像')};
 imgCity.src=ASSET_CITY;imgEarth.src=ASSET_EARTH;
@@ -303,14 +303,23 @@ function drawEiko(x,y,s,rot,T,pose){
   ctx.drawImage(im,-L/2,-h/2,L,h);ctx.restore();
 }
 function drawEikoStand(x,y,s){var im=IM.stand;if(!im||!im.width)return;var h=135*s,w=h*im.width/im.height;ctx.drawImage(im,x-w/2,y,w,h)}
-var MAN_H=245;
-function drawMan(x,y,s,side,sq,cheer){
-  var im=cheer?IM.cheer:IM.pull;if(!im||!im.width)return;
-  var h=MAN_H*s,w=h*im.width/im.height,ax=cheer?0.5:0.4;
-  ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(x,y-2*s,46*s,11*s,0,0,7);ctx.fill();
-  ctx.save();ctx.translate(x,y);if(!cheer)ctx.scale(side*sq,1);ctx.drawImage(im,-w*ax,-h,w,h);ctx.restore();
+var MAN_H=182;
+// 回転中の見え方（えいこの方向 0°=右, 90°=奥, 270°=手前）：[画像, 左右反転]
+var FRAMES=[['s',1],['b',1],['b',1],['b',-1],['s',-1],['fr',-1],['f',1],['fr',1]];
+var ANCH={s:0.363,f:0.502,fr:0.419,b:0.492,cheer:0.5};
+function drawManImg(key,flip,x,y,s,alpha){var im=IM[key];if(!im||!im.width)return;var h=MAN_H*s,w=h*im.width/im.height,ax=ANCH[key];ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);ctx.scale(flip,1);ctx.drawImage(im,-w*ax,-h,w,h);ctx.restore()}
+function drawMan(x,y,s,a,cheer){
+  ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(x,y-2*s,40*s,10*s,0,0,7);ctx.fill();
+  if(cheer){drawManImg('cheer',1,x,y,s*1.08,1);return}
+  var u=(((a/(Math.PI/4))%8)+8)%8,i=Math.floor(u),fr=u-i,j=(i+1)%8;
+  var t=Math.min(1,Math.max(0,(fr-0.42)/0.16));
+  var A=FRAMES[i],B=FRAMES[j];
+  // 遠心力に耐えて体を少し沈める
+  var bob=Math.sin(a*2)*2*s;
+  if(A[0]===B[0]&&A[1]===B[1]){drawManImg(A[0],A[1],x,y+bob,s,1)}
+  else{drawManImg(A[0],A[1],x,y+bob,s,1-t*0.85);drawManImg(B[0],B[1],x,y+bob,s,Math.min(1,t*1.15))}
 }
-function manHand(x,y,s,side,sq){var im=IM.pull,h=MAN_H*s,w=h*(im&&im.width?im.width/im.height:0.68);return{x:x+side*sq*w*(1-0.4)-side*4*s,y:y-h*(1-0.145)}}
+
 function parachute(x,y,s,T){
   ctx.save();ctx.translate(x,y);ctx.scale(s,s);var sw=Math.sin(T*3)*0.08;ctx.rotate(sw);
   var cols=['#ff4f9a','#ffd23f','#3fd0ff','#7dff6b','#b57bff','#ff7a3f'];
@@ -328,9 +337,26 @@ var relX=0,relY=0;
 var SPIN_BUB=['キャー♪','はやーい！','目がまわる〜♪','たのしー！','いけいけー！','とばしてー！'];
 var FLY_BUB=['地球まるーい！','きもちいいー！','みんな見てるー？','まだまだ飛ぶよー！','ひゃっほーい！','宇宙さんぽ〜♪'];
 function go(s){scene=s;st=0}
-function eikoPos(){var cx=W/2,cy=H*0.79,rx=Math.min(W*0.40,175*U),ry=rx*0.30;var c=Math.cos(ang),side=c>=0?1:-1,sq=0.72+0.28*Math.abs(c);
-  var hd=manHand(cx,cy,U,side,sq),oy=hd.y,px=cx+rx*c,py=oy-ry*Math.sin(ang);var dx=px-hd.x,dy=py-hd.y,dl=Math.sqrt(dx*dx+dy*dy);if(dl<1){dx=side;dy=0;dl=1}
-  var es=U*(0.95-0.18*Math.sin(ang)),ux=dx/dl,uy=dy/dl;return{x:hd.x+ux*75*es,y:hd.y+uy*75*es,rot:Math.atan2(-uy,-ux),es:es,cx:cx,cy:cy,rx:rx,ry:ry,oy:oy,side:side,sq:sq}}
+var DK=0.30;
+function rigAt(a){
+  var cx=W/2,cy=H*0.79,Mh=MAN_H*U,sp=Math.min(1,omega/17);
+  var tilt=Mh*0.16*(0.3+sp);var lift=Math.cos(a-Math.PI*0.75)*tilt;
+  var Rh=Mh*0.27,hS=Mh*0.78+lift*0.35,L3=Mh*0.84;
+  var beta=Math.max(0.04,0.95-omega*0.07),hr=L3*Math.cos(beta),hF=hS+lift-L3*Math.sin(beta);
+  function P(r,h){var X=r*Math.cos(a),Z=r*Math.sin(a),pf=1-0.22*Z/(Mh*1.2);return{x:cx+X*pf,y:cy-h*pf-Z*DK,pf:pf}}
+  var Hh=P(Rh,hS),F=P(Rh+hr,hF),G=P(Rh+hr*0.5,0);
+  return{H:Hh,F:F,G:G,L3:L3,x:(Hh.x+F.x)/2,y:(Hh.y+F.y)/2,cx:cx,cy:cy,rx:Rh+L3,ry:(Rh+L3)*DK,a:a};
+}
+function eikoPos(){return rigAt(ang)}
+function drawHeldEiko(r,alpha){
+  var im=IM.fly;if(!im||!im.width)return;
+  var dx=r.H.x-r.F.x,dy=r.H.y-r.F.y,len=Math.sqrt(dx*dx+dy*dy),pf=(r.H.pf+r.F.pf)/2,full=r.L3*pf;
+  var L=Math.max(full*0.32,len),th=full*im.height/im.width,rot=Math.atan2(dy,dx);
+  // 手前・奥では体が縮んで見える（頭／足の側から見る）ので厚みを少し増やす
+  var thk=th*(1+0.35*(1-Math.min(1,len/full)));
+  ctx.save();ctx.globalAlpha=alpha;ctx.translate((r.H.x+r.F.x)/2,(r.H.y+r.F.y)/2);ctx.rotate(rot);if(Math.cos(rot)<-0.02)ctx.scale(1,-1);
+  ctx.drawImage(im,-L/2,-thk/2,L,thk);ctx.restore();
+}
 
 function update(dt){
   updParts(dt);shake=Math.max(0,shake-dt*2.2);
@@ -370,18 +396,17 @@ function drawSpinRig(cheer){
   var p=eikoPos(),cx=p.cx,cy=p.cy;
   // 方角リング
   ctx.save();ctx.globalAlpha=scene==='spin'?0.95:0.5;
-  ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.setLineDash([8,8]);ctx.beginPath();ctx.ellipse(cx,cy,p.rx*1.18,p.ry*1.18,0,0,7);ctx.stroke();ctx.setLineDash([]);
+  ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.setLineDash([8,8]);ctx.beginPath();ctx.ellipse(cx,cy,p.rx*1.08,p.ry*1.08,0,0,7);ctx.stroke();ctx.setLineDash([]);
   var lab=[['北',0,-1],['東',1,0],['南',0,1],['西',-1,0]];
-  for(var i=0;i<4;i++){var lx=cx+lab[i][1]*p.rx*1.42,ly=cy+lab[i][2]*p.ry*1.55;txt(lab[i][0],lx,ly,18*U,lab[i][0]==='北'?'#ff4f9a':'#fff','#0b1a3a',5)}
+  for(var i=0;i<4;i++){var lx=cx+lab[i][1]*p.rx*1.08,ly=cy+lab[i][2]*p.ry*1.08+(lab[i][2]?lab[i][2]*14*U:-14*U);txt(lab[i][0],lx,ly,18*U,lab[i][0]==='北'?'#ff4f9a':'#fff','#0b1a3a',5)}
   ctx.restore();
-  // スピードの残像
-  if(omega>3){ctx.save();ctx.globalAlpha=Math.min(.55,(omega-3)/14);ctx.strokeStyle='#fff';ctx.lineWidth=10*U;ctx.lineCap='round';
-    for(var k=1;k<=3;k++){ctx.beginPath();ctx.ellipse(cx,p.oy,p.rx,p.ry,0,-ang-0.18*k*omega/6,-ang-0.05,false);ctx.stroke()}ctx.restore()}
   var behind=Math.sin(ang)>0;
-  ctx.fillStyle='rgba(0,0,0,.16)';ctx.beginPath();ctx.ellipse(p.x,cy-p.ry*Math.sin(ang)*0.6,40*p.es,9*p.es,0,0,7);ctx.fill();
-  if(behind)drawEiko(p.x,p.y,p.es,p.rot,T,'held');
-  drawMan(cx,cy,U,p.side,p.sq,cheer);
-  if(!behind)drawEiko(p.x,p.y,p.es,p.rot,T,'held');
+  ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(p.G.x,p.G.y,46*U*p.G.pf,10*U*p.G.pf,0,0,7);ctx.fill();
+  function eik(){if(omega>5){for(var k=3;k>=1;k--)drawHeldEiko(rigAt(ang-k*0.022*omega),0.13)}drawHeldEiko(p,1)}
+  if(behind)eik();
+  drawMan(cx,cy,U,ang,cheer);
+  if(!behind)eik();
+  if(omega>8&&Math.random()<0.5)parts.push({k:1,x:cx+(Math.random()-.5)*60*U,y:cy-2,vx:(Math.random()-.5)*120*U,vy:-30*U,g:60,s:2*U,c:'rgba(230,220,200,.8)',life:0.5});
   return p;
 }
 function draw(){
@@ -410,7 +435,7 @@ function draw(){
     var k=st;
     // 光線
     ctx.save();ctx.translate(W/2,H*0.36);ctx.rotate(T*0.8);for(var i=0;i<16;i++){ctx.fillStyle=i%2?'rgba(255,226,80,.55)':'rgba(255,120,180,.45)';ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,H,i*Math.PI/8,(i+1)*Math.PI/8);ctx.closePath();ctx.fill()}ctx.restore();
-    var cx=W/2,cy=H*0.79;drawMan(cx,cy,U,1,1,true);
+    var cx=W/2,cy=H*0.79;drawMan(cx,cy,U,0,true);
     // 飛んでいくえいこ
     var t2=Math.min(1,k/1.2),ex=relX+(W*0.5-relX)*t2,ey=relY+(-80*U-relY)*t2*t2,es=U*(1+t2*0.6)*(1-t2*0.5);
     for(var r=0;r<6;r++){ctx.globalAlpha=0.5;line(ex,ey,relX+(ex-relX)*0.3,relY+(ey-relY)*0.3+r*2,(14-r*2)*U,CONF[r]);}ctx.globalAlpha=1;
