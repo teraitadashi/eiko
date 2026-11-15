@@ -1,0 +1,623 @@
+<!--HEAD_START--><!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="えいこ投げ">
+<meta name="theme-color" content="#0b1a3a">
+<!--HEAD_END-->
+<title>えいこを投げ飛ばしました</title>
+<style>
+:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--pink:#ff4f9a;--gold:#ffd23f}
+html,body{margin:0;padding:0;width:100%;height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%;background:#0b1a3a}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;color:#fff;-webkit-touch-callout:none}
+#cv{position:fixed;left:0;top:0;width:100%;height:100%;touch-action:none;display:block}
+#sa{position:fixed;left:0;top:0;width:0;height:0;padding-top:var(--sat);padding-bottom:var(--sab);visibility:hidden;pointer-events:none}
+.ov{position:fixed;left:0;right:0;top:0;bottom:0;display:flex;flex-direction:column;justify-content:space-between;padding:calc(var(--sat) + 12px) 14px max(16px,calc(var(--sab) + 10px));box-sizing:border-box;pointer-events:none}
+.ov *{pointer-events:auto}
+.hide{display:none!important}
+.logo{text-align:center;margin-top:clamp(18px,7vh,70px);pointer-events:none!important}
+.logo *{pointer-events:none!important}
+.logo .l1,.logo .l2{font-weight:900;line-height:1.05;color:#fff36b;letter-spacing:.02em;
+text-shadow:0 0 0 #000,3px 3px 0 #e8186d,-3px -3px 0 #e8186d,3px -3px 0 #e8186d,-3px 3px 0 #e8186d,0 4px 0 #e8186d,4px 0 0 #e8186d,0 -4px 0 #e8186d,-4px 0 0 #e8186d,0 9px 14px rgba(0,0,0,.45)}
+.logo .l1{font-size:clamp(34px,11vw,52px);white-space:nowrap;transform:rotate(-4deg)}
+.logo .l2{font-size:clamp(30px,10.2vw,50px);white-space:nowrap;transform:rotate(-4deg);margin-top:4px}
+.logo .sub{display:inline-block;margin-top:16px;font-weight:800;font-size:clamp(14px,4vw,17px);background:rgba(11,26,58,.72);padding:8px 14px;border-radius:999px;border:2px solid rgba(255,255,255,.6)}
+.bottom{display:flex;flex-direction:column;gap:10px;align-items:stretch}
+.btn{appearance:none;-webkit-appearance:none;border:0;border-radius:18px;font-weight:900;font-family:inherit;color:#fff;min-height:48px;font-size:17px;padding:10px 16px;cursor:pointer;transition:transform .08s}
+.btn:active{transform:scale(.95)}
+.btn.main{background:linear-gradient(180deg,#ff7ab8,#ff2f7d);font-size:clamp(22px,6.4vw,28px);min-height:64px;box-shadow:0 6px 0 #b0124f,0 10px 22px rgba(0,0,0,.35);text-shadow:0 2px 0 #b0124f}
+.btn.main:active{box-shadow:0 2px 0 #b0124f;transform:translateY(4px)}
+.btn.sub{background:rgba(11,26,58,.82);border:2px solid rgba(255,255,255,.7)}
+.btn.gold{background:linear-gradient(180deg,#ffe45c,#ffb300);color:#5a2a00;box-shadow:0 4px 0 #b37400}
+.row{display:flex;gap:10px}.row .btn{flex:1}
+.best{text-align:center;font-weight:800;font-size:14px;text-shadow:0 1px 3px #000;min-height:18px}
+.gear{position:fixed;right:12px;top:calc(var(--sat) + 10px);width:46px;height:46px;border-radius:50%;border:2px solid rgba(255,255,255,.75);background:rgba(11,26,58,.7);color:#fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;padding:0}
+.gear:active{transform:scale(.9)}
+#result{justify-content:flex-end}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(255,240,248,.97));color:#2a1640;border-radius:26px;padding:16px 16px 14px;box-shadow:0 12px 40px rgba(0,0,0,.45);text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1) both;max-height:calc(100% - 70px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+@keyframes pop{from{transform:translateY(60px) scale(.8);opacity:0}to{transform:none;opacity:1}}
+.card .lab{font-weight:800;color:#e8186d;font-size:14px}
+.card .flag{font-size:clamp(46px,14vw,64px);line-height:1.1}
+.card .place{font-weight:900;font-size:clamp(22px,6.6vw,28px);line-height:1.2}
+.card .city{font-size:14px;font-weight:700;color:#6b5a80}
+.card .dist{font-weight:900;font-size:clamp(34px,11vw,46px);color:#ff2f7d;line-height:1.1;margin-top:4px}
+.card .dist small{font-size:.5em}
+.card .rank{display:inline-block;background:#2a1640;color:#ffe45c;font-weight:900;border-radius:999px;padding:5px 14px;font-size:14px;margin:4px 0}
+.card .msg{font-weight:700;font-size:15px;margin:8px 0 12px;line-height:1.5}
+.card .new{display:inline-block;background:#ffd23f;color:#7a3a00;font-weight:900;padding:3px 10px;border-radius:8px;font-size:13px;margin-left:6px;animation:blink .6s infinite alternate}
+@keyframes blink{to{transform:scale(1.12)}}
+.card .btn.sub{background:#2a1640;border:0}
+.modal{position:fixed;inset:0;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,.55);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:520px;background:#fff;color:#2a1640;border-radius:24px 24px 0 0;padding:18px 16px max(16px,calc(var(--sab) + 10px));box-sizing:border-box;max-height:86%;display:flex;flex-direction:column;gap:10px;animation:up .25s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.3}to{transform:none;opacity:1}}
+.sheet h2{margin:0;font-size:20px;font-weight:900;text-align:center}
+.scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0}
+.sheet .btn.sub{background:#2a1640;border:0}
+.set{display:flex;flex-direction:column;gap:10px}
+.set .btn{width:100%}
+.set p{margin:0;font-size:13px;color:#6b5a80;line-height:1.5}
+.tog{display:flex;justify-content:space-between;align-items:center;background:#f4eef9;border-radius:14px;padding:6px 8px 6px 14px;font-weight:800;min-height:48px}
+.tog button{min-width:84px;min-height:40px;border-radius:12px;border:0;font-weight:900;font-size:15px;font-family:inherit}
+.tog .on{background:#ff2f7d;color:#fff}.tog .off{background:#cfc6da;color:#555}
+textarea{width:100%;box-sizing:border-box;min-height:140px;font-size:16px;border-radius:12px;border:2px solid #cfc6da;padding:10px;font-family:inherit;-webkit-user-select:text;user-select:text}
+.stamps{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.stamp{background:#f4eef9;border-radius:14px;padding:8px 4px;text-align:center;font-weight:800;font-size:12px;line-height:1.35}
+.stamp .f{font-size:30px}
+.stamp.lock{opacity:.35}
+.howto{font-size:14px;line-height:1.7;margin:0;padding-left:1.2em}
+#toast{position:fixed;left:50%;top:calc(var(--sat) + 70px);transform:translateX(-50%);background:rgba(20,10,40,.92);color:#fff;padding:10px 16px;border-radius:14px;font-weight:800;font-size:14px;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:86%;text-align:center}
+#toast.show{opacity:1}
+#load{position:fixed;inset:0;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0b1a3a;z-index:60;font-weight:900;font-size:18px;text-align:center;padding:20px;gap:10px}
+@media (max-height:700px){.logo{margin-top:6px}.btn.main{min-height:56px}.card{padding:12px}.card .msg{margin:4px 0 8px}}
+</style>
+<!--BODY_START--></head>
+<body>
+<!--BODY_END-->
+<canvas id="cv"></canvas>
+<div id="sa"></div>
+<div id="title" class="ov hide">
+  <div class="logo"><div class="l1">えいこを</div><div class="l2">投げ飛ばしました</div><div class="sub">🌏 日本から世界へ！どこまで飛ばせる？</div></div>
+  <div class="bottom">
+    <div id="bestT" class="best"></div>
+    <button id="bStart" class="btn main">スタート！</button>
+    <div class="row"><button id="bStamp" class="btn sub">🗺 スタンプ帳</button><button id="bHow" class="btn sub">❓ あそびかた</button></div>
+  </div>
+</div>
+<div id="result" class="ov hide"><div id="card" class="card"></div></div>
+<button id="bGear" class="gear hide" aria-label="設定">⚙︎</button>
+<div id="modal" class="modal hide"><div class="sheet"><h2 id="mTitle"></h2><div id="mBody" class="scroll"></div><button id="mClose" class="btn sub">とじる</button></div></div>
+<div id="toast"></div>
+<div id="load"><div>🌏</div><div id="loadMsg">よみこみ中…</div></div>
+<script>
+(function(){'use strict';
+var ASSET_EARTH='__EARTH__',ASSET_CITY='__CITY__',ASSET_SONG='__SONG__';
+var $=function(id){return document.getElementById(id)};
+var loaded=false;
+function fatal(msg){var l=$('load');l.classList.remove('hide');$('loadMsg').innerHTML='よみこめませんでした<br><small style="font-weight:600">（'+String(msg).replace(/</g,'&lt;')+'）</small><br><small style="font-weight:600">開きなおしてみてね</small>';}
+window.addEventListener('error',function(e){if(!loaded)fatal(e.message||'エラー')});
+setTimeout(function(){if(!loaded)fatal('時間がかかりすぎています')},15000);
+
+/* ===== Platform（端末依存処理はここに集約：アプリ版で差し替え） ===== */
+var Platform={
+  load:function(k){try{return localStorage.getItem(k)}catch(e){return null}},
+  save:function(k,v){try{localStorage.setItem(k,v);return true}catch(e){return false}},
+  copy:function(text){
+    function fallback(){try{var ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);ta.select();var ok=document.execCommand('copy');document.body.removeChild(ta);return ok}catch(e){return false}}
+    if(navigator.clipboard&&navigator.clipboard.writeText){return navigator.clipboard.writeText(text).then(function(){return true},function(){return fallback()})}
+    return Promise.resolve(fallback());
+  },
+  share:function(text){
+    if(navigator.share){return navigator.share({text:text}).then(function(){return 'shared'},function(){return 'cancel'})}
+    return Platform.copy(text).then(function(ok){return ok?'copied':'fail'});
+  },
+  haptic:function(ms){try{if(navigator.vibrate)navigator.vibrate(ms)}catch(e){}}
+};
+
+/* ===== データ ===== */
+var KEY='eiko-throw-v1';
+var data={v:1,best:0,bestPlace:'',plays:0,stamps:{},music:true,voice:true};
+try{var raw=Platform.load(KEY);if(raw){var o=JSON.parse(raw);if(o&&o.v===1){for(var k in o)data[k]=o[k]}}}catch(e){}
+function saveData(){Platform.save(KEY,JSON.stringify(data))}
+
+/* ===== 地理 ===== */
+var D2R=Math.PI/180,R2D=180/Math.PI,TOKYO=[35.68,139.76];
+// [都市, 国, 旗, 緯度, 経度]
+var C=[
+['横浜','日本','🇯🇵',35.44,139.64],['静岡','日本','🇯🇵',34.98,138.38],['名古屋','日本','🇯🇵',35.18,136.91],['大阪','日本','🇯🇵',34.69,135.50],['広島','日本','🇯🇵',34.39,132.46],['福岡','日本','🇯🇵',33.59,130.40],['鹿児島','日本','🇯🇵',31.60,130.56],['那覇','日本','🇯🇵',26.21,127.68],['仙台','日本','🇯🇵',38.27,140.87],['新潟','日本','🇯🇵',37.90,139.02],['青森','日本','🇯🇵',40.82,140.74],['札幌','日本','🇯🇵',43.06,141.35],['金沢','日本','🇯🇵',36.56,136.66],['高知','日本','🇯🇵',33.56,133.53],['長野','日本','🇯🇵',36.65,138.18],['父島（小笠原）','日本','🇯🇵',27.09,142.19],['宮古島','日本','🇯🇵',24.80,125.28],
+['ソウル','韓国','🇰🇷',37.57,126.98],['釜山','韓国','🇰🇷',35.18,129.08],['済州島','韓国','🇰🇷',33.49,126.53],
+['北京','中国','🇨🇳',39.90,116.41],['上海','中国','🇨🇳',31.23,121.47],['広州','中国','🇨🇳',23.13,113.26],['成都','中国','🇨🇳',30.57,104.07],['ウルムチ','中国','🇨🇳',43.83,87.62],['ラサ','中国','🇨🇳',29.65,91.17],['ハルビン','中国','🇨🇳',45.80,126.53],['西安','中国','🇨🇳',34.34,108.94],['昆明','中国','🇨🇳',25.04,102.71],
+['台北','台湾','🇹🇼',25.03,121.57],['高雄','台湾','🇹🇼',22.63,120.30],['香港','香港','🇭🇰',22.32,114.17],
+['ウランバートル','モンゴル','🇲🇳',47.89,106.91],
+['ウラジオストク','ロシア','🇷🇺',43.12,131.89],['ハバロフスク','ロシア','🇷🇺',48.48,135.08],['ヤクーツク','ロシア','🇷🇺',62.03,129.73],['マガダン','ロシア','🇷🇺',59.57,150.80],['ペトロパブロフスク','ロシア','🇷🇺',53.02,158.65],['ノボシビルスク','ロシア','🇷🇺',55.01,82.93],['モスクワ','ロシア','🇷🇺',55.76,37.62],['イルクーツク','ロシア','🇷🇺',52.29,104.28],['ノリリスク','ロシア','🇷🇺',69.35,88.20],['アナディリ','ロシア','🇷🇺',64.73,177.50],['ユジノサハリンスク','ロシア','🇷🇺',46.96,142.73],['チクシ','ロシア','🇷🇺',71.64,128.87],['エカテリンブルク','ロシア','🇷🇺',56.84,60.60],
+['マニラ','フィリピン','🇵🇭',14.60,120.98],['ダバオ','フィリピン','🇵🇭',7.19,125.46],['ハノイ','ベトナム','🇻🇳',21.03,105.85],['ホーチミン','ベトナム','🇻🇳',10.82,106.63],['バンコク','タイ','🇹🇭',13.76,100.50],['プノンペン','カンボジア','🇰🇭',11.56,104.92],['ビエンチャン','ラオス','🇱🇦',17.97,102.63],['ヤンゴン','ミャンマー','🇲🇲',16.84,96.17],['クアラルンプール','マレーシア','🇲🇾',3.14,101.69],['コタキナバル','マレーシア','🇲🇾',5.98,116.07],['シンガポール','シンガポール','🇸🇬',1.35,103.82],['ジャカルタ','インドネシア','🇮🇩',-6.21,106.85],['バリ島','インドネシア','🇮🇩',-8.65,115.22],['ジャヤプラ','インドネシア','🇮🇩',-2.53,140.72],['マカッサル','インドネシア','🇮🇩',-5.15,119.43],['ブルネイ','ブルネイ','🇧🇳',4.94,114.95],
+['ポートモレスビー','パプアニューギニア','🇵🇬',-9.44,147.18],['シドニー','オーストラリア','🇦🇺',-33.87,151.21],['メルボルン','オーストラリア','🇦🇺',-37.81,144.96],['パース','オーストラリア','🇦🇺',-31.95,115.86],['ダーウィン','オーストラリア','🇦🇺',-12.46,130.84],['ケアンズ','オーストラリア','🇦🇺',-16.92,145.77],['アリススプリングス','オーストラリア','🇦🇺',-23.70,133.88],['ブリスベン','オーストラリア','🇦🇺',-27.47,153.03],['アデレード','オーストラリア','🇦🇺',-34.93,138.60],['ホバート','オーストラリア','🇦🇺',-42.88,147.33],
+['オークランド','ニュージーランド','🇳🇿',-36.85,174.76],['クライストチャーチ','ニュージーランド','🇳🇿',-43.53,172.64],['グアム','グアム','🇬🇺',13.44,144.79],['サイパン','北マリアナ諸島','🇲🇵',15.18,145.75],['コロール','パラオ','🇵🇼',7.34,134.48],['スバ','フィジー','🇫🇯',-18.14,178.44],['タラワ','キリバス','🇰🇮',1.45,172.97],['アピア','サモア','🇼🇸',-13.83,-171.76],['タヒチ','フランス領ポリネシア','🇵🇫',-17.53,-149.57],['マジュロ','マーシャル諸島','🇲🇭',7.09,171.38],['ヌメア','ニューカレドニア','🇳🇨',-22.27,166.44],['ホニアラ','ソロモン諸島','🇸🇧',-9.43,159.95],['ポンペイ','ミクロネシア','🇫🇲',6.92,158.16],['ヌクアロファ','トンガ','🇹🇴',-21.14,-175.20],['ミッドウェー','アメリカ','🇺🇸',28.21,-177.38],['ホノルル','アメリカ','🇺🇸',21.31,-157.86],
+['デリー','インド','🇮🇳',28.61,77.21],['ムンバイ','インド','🇮🇳',19.08,72.88],['コルカタ','インド','🇮🇳',22.57,88.36],['ベンガルール','インド','🇮🇳',12.97,77.59],['カトマンズ','ネパール','🇳🇵',27.72,85.32],['ティンプー','ブータン','🇧🇹',27.47,89.64],['ダッカ','バングラデシュ','🇧🇩',23.81,90.41],['コロンボ','スリランカ','🇱🇰',6.93,79.86],['マレ','モルディブ','🇲🇻',4.18,73.51],['カラチ','パキスタン','🇵🇰',24.86,67.01],['イスラマバード','パキスタン','🇵🇰',33.68,73.05],['カブール','アフガニスタン','🇦🇫',34.56,69.21],['アスタナ','カザフスタン','🇰🇿',51.17,71.43],['アルマトイ','カザフスタン','🇰🇿',43.24,76.89],['タシケント','ウズベキスタン','🇺🇿',41.30,69.24],['ビシュケク','キルギス','🇰🇬',42.87,74.59],
+['テヘラン','イラン','🇮🇷',35.69,51.39],['ドバイ','アラブ首長国連邦','🇦🇪',25.20,55.27],['リヤド','サウジアラビア','🇸🇦',24.71,46.68],['ドーハ','カタール','🇶🇦',25.29,51.53],['マスカット','オマーン','🇴🇲',23.59,58.41],['バグダッド','イラク','🇮🇶',33.31,44.36],['イスタンブール','トルコ','🇹🇷',41.01,28.98],['アンカラ','トルコ','🇹🇷',39.93,32.86],['カイロ','エジプト','🇪🇬',30.04,31.24],['アテネ','ギリシャ','🇬🇷',37.98,23.73],['ローマ','イタリア','🇮🇹',41.90,12.50],['ミラノ','イタリア','🇮🇹',45.46,9.19],['パリ','フランス','🇫🇷',48.86,2.35],['マルセイユ','フランス','🇫🇷',43.30,5.37],['ロンドン','イギリス','🇬🇧',51.51,-0.13],['エディンバラ','イギリス','🇬🇧',55.95,-3.19],['ダブリン','アイルランド','🇮🇪',53.35,-6.26],['ベルリン','ドイツ','🇩🇪',52.52,13.40],['ミュンヘン','ドイツ','🇩🇪',48.14,11.58],['マドリード','スペイン','🇪🇸',40.42,-3.70],['バルセロナ','スペイン','🇪🇸',41.39,2.17],['リスボン','ポルトガル','🇵🇹',38.72,-9.14],['アムステルダム','オランダ','🇳🇱',52.37,4.90],['チューリッヒ','スイス','🇨🇭',47.38,8.54],['ウィーン','オーストリア','🇦🇹',48.21,16.37],['プラハ','チェコ','🇨🇿',50.08,14.44],['ストックホルム','スウェーデン','🇸🇪',59.33,18.07],['オスロ','ノルウェー','🇳🇴',59.91,10.75],['トロムソ','ノルウェー','🇳🇴',69.65,18.96],['ヘルシンキ','フィンランド','🇫🇮',60.17,24.94],['ワルシャワ','ポーランド','🇵🇱',52.23,21.01],['キーウ','ウクライナ','🇺🇦',50.45,30.52],['ブカレスト','ルーマニア','🇷🇴',44.43,26.10],['レイキャビク','アイスランド','🇮🇸',64.15,-21.94],['ヌーク','グリーンランド','🇬🇱',64.18,-51.72],['カーナーク','グリーンランド','🇬🇱',77.47,-69.23],
+['ナイロビ','ケニア','🇰🇪',-1.29,36.82],['アディスアベバ','エチオピア','🇪🇹',9.03,38.74],['ダルエスサラーム','タンザニア','🇹🇿',-6.79,39.21],['アンタナナリボ','マダガスカル','🇲🇬',-18.88,47.51],['ケープタウン','南アフリカ','🇿🇦',-33.92,18.42],['ヨハネスブルグ','南アフリカ','🇿🇦',-26.20,28.05],['ラゴス','ナイジェリア','🇳🇬',6.52,3.38],['アクラ','ガーナ','🇬🇭',5.60,-0.19],['ダカール','セネガル','🇸🇳',14.72,-17.47],['マラケシュ','モロッコ','🇲🇦',31.63,-7.99],['アルジェ','アルジェリア','🇩🇿',36.75,3.06],['タマンラセット','アルジェリア','🇩🇿',22.79,5.53],['キンシャサ','コンゴ民主共和国','🇨🇩',-4.44,15.27],['ルアンダ','アンゴラ','🇦🇴',-8.84,13.23],['ウィントフック','ナミビア','🇳🇦',-22.56,17.08],['ハルツーム','スーダン','🇸🇩',15.50,32.56],['バマコ','マリ','🇲🇱',12.64,-8.00],['ンジャメナ','チャド','🇹🇩',12.13,15.06],['トリポリ','リビア','🇱🇾',32.89,13.19],['モガディシュ','ソマリア','🇸🇴',2.05,45.32],['ルサカ','ザンビア','🇿🇲',-15.39,28.32],['マプト','モザンビーク','🇲🇿',-25.97,32.57],['ポートルイス','モーリシャス','🇲🇺',-20.16,57.50],['ニアメ','ニジェール','🇳🇪',13.51,2.11],
+['アンカレッジ','アメリカ','🇺🇸',61.22,-149.90],['ノーム','アメリカ','🇺🇸',64.50,-165.41],['シアトル','アメリカ','🇺🇸',47.61,-122.33],['サンフランシスコ','アメリカ','🇺🇸',37.77,-122.42],['ロサンゼルス','アメリカ','🇺🇸',34.05,-118.24],['ラスベガス','アメリカ','🇺🇸',36.17,-115.14],['デンバー','アメリカ','🇺🇸',39.74,-104.99],['シカゴ','アメリカ','🇺🇸',41.88,-87.63],['ダラス','アメリカ','🇺🇸',32.78,-96.80],['ニューヨーク','アメリカ','🇺🇸',40.71,-74.01],['マイアミ','アメリカ','🇺🇸',25.76,-80.19],['ワシントンD.C.','アメリカ','🇺🇸',38.91,-77.04],['アトランタ','アメリカ','🇺🇸',33.75,-84.39],['ミネアポリス','アメリカ','🇺🇸',44.98,-93.27],['ボストン','アメリカ','🇺🇸',42.36,-71.06],
+['バンクーバー','カナダ','🇨🇦',49.28,-123.12],['カルガリー','カナダ','🇨🇦',51.05,-114.07],['トロント','カナダ','🇨🇦',43.65,-79.38],['モントリオール','カナダ','🇨🇦',45.50,-73.57],['イエローナイフ','カナダ','🇨🇦',62.45,-114.37],['イカルイト','カナダ','🇨🇦',63.75,-68.52],['ホワイトホース','カナダ','🇨🇦',60.72,-135.06],['ウィニペグ','カナダ','🇨🇦',49.90,-97.14],['ケンブリッジベイ','カナダ','🇨🇦',69.12,-105.06],['チャーチル','カナダ','🇨🇦',58.77,-94.17],
+['メキシコシティ','メキシコ','🇲🇽',19.43,-99.13],['カンクン','メキシコ','🇲🇽',21.16,-86.85],['ハバナ','キューバ','🇨🇺',23.11,-82.37],['グアテマラシティ','グアテマラ','🇬🇹',14.63,-90.51],['パナマシティ','パナマ','🇵🇦',8.98,-79.52],['サンホセ','コスタリカ','🇨🇷',9.93,-84.08],['キングストン','ジャマイカ','🇯🇲',18.02,-76.80],
+['ボゴタ','コロンビア','🇨🇴',4.71,-74.07],['カラカス','ベネズエラ','🇻🇪',10.48,-66.90],['キト','エクアドル','🇪🇨',-0.18,-78.47],['ガラパゴス諸島','エクアドル','🇪🇨',-0.74,-90.31],['リマ','ペルー','🇵🇪',-12.05,-77.04],['クスコ','ペルー','🇵🇪',-13.53,-71.97],['ラパス','ボリビア','🇧🇴',-16.49,-68.12],['マナウス','ブラジル','🇧🇷',-3.12,-60.02],['ブラジリア','ブラジル','🇧🇷',-15.79,-47.88],['リオデジャネイロ','ブラジル','🇧🇷',-22.91,-43.17],['サンパウロ','ブラジル','🇧🇷',-23.55,-46.63],['サルバドール','ブラジル','🇧🇷',-12.97,-38.50],['ベレン','ブラジル','🇧🇷',-1.46,-48.49],['クイアバ','ブラジル','🇧🇷',-15.60,-56.10],['ポルトアレグレ','ブラジル','🇧🇷',-30.03,-51.23],['サンティアゴ','チリ','🇨🇱',-33.45,-70.67],['イースター島','チリ','🇨🇱',-27.11,-109.35],['プンタアレナス','チリ','🇨🇱',-53.16,-70.92],['アントファガスタ','チリ','🇨🇱',-23.65,-70.40],['ブエノスアイレス','アルゼンチン','🇦🇷',-34.60,-58.38],['ウシュアイア','アルゼンチン','🇦🇷',-54.80,-68.30],['コルドバ','アルゼンチン','🇦🇷',-31.42,-64.18],['バイアブランカ','アルゼンチン','🇦🇷',-38.72,-62.27],['コモドーロ・リバダビア','アルゼンチン','🇦🇷',-45.86,-67.48],['メンドーサ','アルゼンチン','🇦🇷',-32.89,-68.84],['モンテビデオ','ウルグアイ','🇺🇾',-34.90,-56.16],['アスンシオン','パラグアイ','🇵🇾',-25.26,-57.58],['パラマリボ','スリナム','🇸🇷',5.85,-55.20],['フォークランド諸島','フォークランド諸島','🇫🇰',-51.70,-57.85]
+];
+var HELLO={'日本':'まだ日本だった！でも景色は最高♪','韓国':'アンニョンハセヨ〜！','中国':'ニーハオ！','台湾':'ニーハオ！小籠包たべたい♪','香港':'ネイホウ！夜景きれい〜','モンゴル':'サェンバェノー！草原ひろーい！','ロシア':'ズドラーストヴィチェ！さむーい！','フィリピン':'マガンダン ハポン！','ベトナム':'シンチャオ！フォーおいしそう','タイ':'サワディーカー！','カンボジア':'チョムリアップ スオ！','マレーシア':'スラマッ ダタン！','シンガポール':'ハロー！マーライオンにごあいさつ','インドネシア':'スラマッ シアン！','オーストラリア':'グッダイ！カンガルーと記念撮影♪','ニュージーランド':'キアオラ！羊がいっぱい','アメリカ':'ハロー！アメリカンサイズのハンバーガー！','カナダ':'ハロー！メープルシロップの香り','メキシコ':'オラ！タコス〜♪','ブラジル':'オラ！サンバでお出迎え♪','アルゼンチン':'オラ！地球の裏側バンザイ！','ウルグアイ':'オラ！ほぼ地球の裏側！','チリ':'オラ！細長い国にとうちゃく','ペルー':'オラ！アルパカがお出迎え','イギリス':'ハロー！紅茶でひと休み','フランス':'ボンジュール！クロワッサンどうぞ','ドイツ':'グーテンターク！','イタリア':'チャオ！ピザたべよ〜','スペイン':'オラ！パエリア最高','インド':'ナマステ〜！カレーの香り','エジプト':'アッサラーム！ピラミッド見えた！','トルコ':'メルハバ！','ケニア':'ジャンボ！キリンと目が合った','南アフリカ':'サウボナ！','アイスランド':'ハウ！オーロラきれい〜','グリーンランド':'氷の大地にとうちゃく！','ハワイ':'アロハ〜！','グアム':'ハファ・アダイ！','フィジー':'ブラ！','南極':'ペンギンさんにかこまれた！🐧','北極':'シロクマさんがびっくり！🐻‍❄️'};
+var GAGS=['パラシュートでふんわり着地♪','ふかふかの干し草にぽふっ♪','ちょうどお祭りのど真ん中に着地！','現地の人に拍手でお出迎えされた！','トランポリンに着地して3回はねた♪','たまたま開いてたカフェのソファに着地☕','ハトの群れがクッションになってくれた🕊','記念写真を100枚とられた📸'];
+var SEAGAGS=['浮き輪でぷかぷか🛟 イルカが岸まで送ってくれた🐬','クジラの背中にぽよん🐋','ちょうど通った豪華客船のプールにドボン🚢','ウミガメに乗って帰ることにした🐢'];
+function hav(a1,o1,a2,o2){var p1=a1*D2R,p2=a2*D2R,dp=p2-p1,dl=(o2-o1)*D2R;var h=Math.sin(dp/2)*Math.sin(dp/2)+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);return 12742*Math.asin(Math.min(1,Math.sqrt(h)))}
+function dest(lat,lon,brg,km){var d=km/6371,p1=lat*D2R,l1=lon*D2R;var p2=Math.asin(Math.sin(p1)*Math.cos(d)+Math.cos(p1)*Math.sin(d)*Math.cos(brg));var l2=l1+Math.atan2(Math.sin(brg)*Math.sin(d)*Math.cos(p1),Math.cos(d)-Math.sin(p1)*Math.sin(p2));var lo=((l2*R2D+540)%360)-180;return[p2*R2D,lo]}
+function nearest(lat,lon){var b=null,bd=1e9;for(var i=0;i<C.length;i++){var d=hav(lat,lon,C[i][3],C[i][4]);if(d<bd){bd=d;b=C[i]}}return{c:b,d:bd}}
+function ocean(lat,lon){
+  if(lat>66)return'北極海';if(lat<-55)return'南極海';
+  if(lat>34&&lat<46&&lon>128&&lon<141)return'日本海';
+  if(lat>24&&lat<34&&lon>119&&lon<130)return'東シナ海';
+  if(lat>0&&lat<23&&lon>105&&lon<121)return'南シナ海';
+  if(lat>30&&lat<46&&lon>-6&&lon<36)return'地中海';
+  if(lat>10&&lat<31&&lon>-98&&lon<-60)return'カリブ海';
+  if(lon>=20&&lon<=118&&lat<30)return'インド洋';
+  if(lon>-70&&lon<20)return'大西洋';
+  if(lon>=-100&&lon<=-70&&lat>9)return'大西洋';
+  return'太平洋';
+}
+var MASK=null,MW=512,MH=256;
+function buildMask(img){try{var c=document.createElement('canvas');c.width=MW;c.height=MH;var x=c.getContext('2d');x.drawImage(img,0,0,MW,MH);var d=x.getImageData(0,0,MW,MH).data;MASK=new Uint8Array(MW*MH);for(var i=0;i<MW*MH;i++){var r=d[i*4],g=d[i*4+1],b=d[i*4+2];MASK[i]=(b>r*1.25&&b>=g*0.95&&r<90)?0:1}}catch(e){MASK=null}}
+function isLand(lat,lon){if(!MASK)return null;var x=Math.floor((lon+180)/360*MW)%MW,y=Math.min(MH-1,Math.max(0,Math.floor((90-lat)/180*MH)));return MASK[y*MW+x]===1}
+function place(lat,lon,th){
+  th=th||700;
+  if(lat<-63)return{land:true,country:'南極',flag:'🇦🇶',city:'南極大陸'};
+  if(lat>82)return{land:true,country:'北極',flag:'🧊',city:'北極の氷の上'};
+  var n=nearest(lat,lon),L=isLand(lat,lon);
+  if(n.d<150||(L===true&&n.d<2500)||(L===null&&n.d<th))return{land:true,country:n.c[1],flag:n.c[2],city:n.c[0],d:n.d};
+  return{land:false,country:ocean(lat,lon),flag:'🌊',city:'',near:n.c};
+}
+var DIRS=['北','北東','東','南東','南','南西','西','北西'];
+function dirName(b){return DIRS[Math.round(((b*R2D%360)+360)%360/45)%8]}
+function rankOf(km){if(km<300)return'ご近所フライト級';if(km<1500)return'国内ジャンプ級';if(km<4000)return'アジア制覇級';if(km<9000)return'大陸横断級';if(km<15000)return'地球半周級';return'地球の裏側！伝説級';}
+function fmt(n){return Math.round(n).toLocaleString('ja-JP')}
+
+/* ===== キャンバス ===== */
+var cv=$('cv'),ctx=cv.getContext('2d');
+var W=430,H=932,DPR=1,SAT=0,SAB=0,U=1;
+var FONT='-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif';
+var gc=document.createElement('canvas'),gl=null,GLP=null,GDPR=1;
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,3);W=window.innerWidth||430;H=window.innerHeight||932;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);
+  var cs=getComputedStyle($('sa'));SAT=parseFloat(cs.paddingTop)||0;SAB=parseFloat(cs.paddingBottom)||0;
+  U=Math.min(W/430,H/800);
+  GDPR=Math.min(DPR,2);gc.width=Math.round(W*GDPR);gc.height=Math.round(H*GDPR);
+  if(gl)gl.viewport(0,0,gc.width,gc.height);
+}
+window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200)});
+
+/* ===== WebGL 地球 ===== */
+function initGL(img){
+  try{gl=gc.getContext('webgl',{premultipliedAlpha:true,alpha:true,preserveDrawingBuffer:true})||gc.getContext('experimental-webgl');}catch(e){gl=null}
+  if(!gl)return;
+  var vs='attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}';
+  var fs='precision highp float;uniform sampler2D t;uniform vec2 c;uniform float r;uniform float la;uniform float lo;'+
+  'void main(){vec2 q=(gl_FragCoord.xy-c)/r;float rho=length(q);'+
+  'if(rho>1.0){float g=smoothstep(1.14,1.0,rho);g=g*g;gl_FragColor=vec4(0.35,0.65,1.0,1.0)*g*0.85;return;}'+
+  'float cc=asin(rho);float sc=sin(cc);float co=cos(cc);float lat=la;float lon=lo;'+
+  'if(rho>0.00001){lat=asin(clamp(co*sin(la)+q.y*sc*cos(la)/rho,-1.0,1.0));lon=lo+atan(q.x*sc,rho*co*cos(la)-q.y*sc*sin(la));}'+
+  'vec2 uv=vec2(fract((lon+3.14159265)/6.28318531),(1.57079633-lat)/3.14159265);'+
+  'vec3 col=texture2D(t,uv).rgb;col=col*(0.5+0.6*co);col=mix(col,vec3(0.55,0.8,1.0),pow(rho,5.0)*0.45);'+
+  'gl_FragColor=vec4(col,1.0);}';
+  function sh(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s}
+  try{
+    var pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);
+    if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('link');
+    gl.useProgram(pr);
+    var b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+    var lp=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
+    var tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGB,gl.RGB,gl.UNSIGNED_BYTE,img);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    GLP={c:gl.getUniformLocation(pr,'c'),r:gl.getUniformLocation(pr,'r'),la:gl.getUniformLocation(pr,'la'),lo:gl.getUniformLocation(pr,'lo')};
+    gl.viewport(0,0,gc.width,gc.height);
+  }catch(e){gl=null;GLP=null}
+}
+function drawGlobe(lat,lon,R,cx,cy){
+  if(gl&&GLP){
+    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform2f(GLP.c,cx*GDPR,(H-cy)*GDPR);gl.uniform1f(GLP.r,R*GDPR);gl.uniform1f(GLP.la,lat*D2R);gl.uniform1f(GLP.lo,lon*D2R);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    ctx.drawImage(gc,0,0,W,H);
+  }else{
+    var g=ctx.createRadialGradient(cx-R*.3,cy-R*.3,R*.1,cx,cy,R);g.addColorStop(0,'#5fb2ff');g.addColorStop(1,'#0b3a8a');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.fill();
+  }
+}
+function proj(lat,lon,la0,lo0,R,cx,cy){
+  var p=lat*D2R,l=lon*D2R,p0=la0*D2R,l0=lo0*D2R,dl=l-l0;
+  var cc=Math.sin(p0)*Math.sin(p)+Math.cos(p0)*Math.cos(p)*Math.cos(dl);
+  return{x:cx+R*Math.cos(p)*Math.sin(dl),y:cy-R*(Math.cos(p0)*Math.sin(p)-Math.sin(p0)*Math.cos(p)*Math.cos(dl)),v:cc>0};
+}
+
+/* ===== アセット ===== */
+var imgCity=new Image(),imgEarth=new Image(),nLoaded=0;
+var bgm=null;
+function onAsset(){nLoaded++;if(nLoaded===2)boot()}
+imgCity.onload=onAsset;imgEarth.onload=onAsset;
+imgCity.onerror=imgEarth.onerror=function(){fatal('画像')};
+imgCity.src=ASSET_CITY;imgEarth.src=ASSET_EARTH;
+
+/* ===== 音 ===== */
+var AC=null,unlocked=false,musicOn=false;
+function ensureAC(){if(!AC){try{var A=window.AudioContext||window.webkitAudioContext;if(A)AC=new A()}catch(e){AC=null}}if(AC&&AC.state==='suspended'){try{AC.resume()}catch(e){}}}
+function unlock(){
+  ensureAC();
+  if(!unlocked&&bgm){unlocked=true;try{bgm.muted=true;var p=bgm.play();if(p&&p.then)p.then(function(){if(!musicOn){bgm.pause();bgm.currentTime=0}bgm.muted=false},function(){bgm.muted=false});else{bgm.pause();bgm.muted=false}}catch(e){bgm.muted=false}}
+  if(window.speechSynthesis){try{speechSynthesis.getVoices()}catch(e){}}
+}
+function playMusic(){if(!data.music||!bgm)return;musicOn=true;try{bgm.muted=false;bgm.currentTime=0;var p=bgm.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
+function stopMusic(){musicOn=false;if(!bgm)return;try{bgm.pause();bgm.currentTime=0}catch(e){}}
+function tone(f,dur,type,vol,slide,delay){
+  if(!AC)return;try{var t0=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+dur);
+  g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol||0.2,t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(AC.destination);o.start(t0);o.stop(t0+dur+0.05)}catch(e){}
+}
+var nbuf=null;
+function noiseBuf(){if(!nbuf&&AC){nbuf=AC.createBuffer(1,AC.sampleRate,AC.sampleRate);var d=nbuf.getChannelData(0);for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1}return nbuf}
+function whoosh(dur,f0,f1,vol){if(!AC)return;try{var s=AC.createBufferSource();s.buffer=noiseBuf();s.loop=true;var bp=AC.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.2;var t0=AC.currentTime;bp.frequency.setValueAtTime(f0,t0);bp.frequency.exponentialRampToValueAtTime(f1,t0+dur);var g=AC.createGain();g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol,t0+dur*0.2);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);s.connect(bp);bp.connect(g);g.connect(AC.destination);s.start(t0);s.stop(t0+dur+0.05)}catch(e){}}
+var wind=null;
+function windStart(){if(!AC||wind)return;try{var s=AC.createBufferSource();s.buffer=noiseBuf();s.loop=true;var bp=AC.createBiquadFilter();bp.type='bandpass';bp.Q.value=0.8;bp.frequency.value=400;var g=AC.createGain();g.gain.value=0.0001;s.connect(bp);bp.connect(g);g.connect(AC.destination);s.start();wind={s:s,g:g,f:bp}}catch(e){}}
+function windSet(v){if(wind){try{wind.g.gain.setTargetAtTime(v*0.25,AC.currentTime,0.05);wind.f.frequency.setTargetAtTime(300+v*1400,AC.currentTime,0.05)}catch(e){}}}
+function windStop(){if(wind){try{wind.s.stop()}catch(e){}wind=null}}
+function fanfare(){var n=[523,659,784,1047,784,1047,1319];for(var i=0;i<n.length;i++)tone(n[i],i===n.length-1?0.6:0.16,'square',0.07,null,i*0.09)}
+function ding(){tone(1318,0.25,'triangle',0.15);tone(1760,0.35,'triangle',0.12,null,0.08)}
+function popS(){tone(520,0.25,'sine',0.3,180);tone(900,0.15,'triangle',0.15,1400,0.05)}
+function say(t){if(!data.voice||!window.speechSynthesis)return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.pitch=1.6;u.rate=1.1;u.volume=1;var vs=speechSynthesis.getVoices()||[];for(var i=0;i<vs.length;i++){if(/ja/i.test(vs[i].lang)){u.voice=vs[i];break}}speechSynthesis.speak(u)}catch(e){}}
+
+/* ===== パーティクル ===== */
+var parts=[],shake=0;
+var CONF=['#ff4f9a','#ffd23f','#3fd0ff','#7dff6b','#ff7a3f','#b57bff','#ffffff'];
+function confetti(n,x,y,spd){for(var i=0;i<n;i++){var a=Math.random()*Math.PI*2,v=(0.3+Math.random())*spd;parts.push({k:0,x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-spd*0.4,g:500*U,r:Math.random()*6,vr:(Math.random()-.5)*14,w:(6+Math.random()*6)*U,h:(3+Math.random()*4)*U,c:CONF[i%CONF.length],life:2.2+Math.random()*1.5})}}
+function spark(x,y,n,spd,col){for(var i=0;i<n;i++){var a=Math.random()*Math.PI*2,v=Math.random()*spd;parts.push({k:1,x:x,y:y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,g:0,s:(2+Math.random()*4)*U,c:col||CONF[(Math.random()*CONF.length)|0],life:0.4+Math.random()*0.6})}}
+function updParts(dt){for(var i=parts.length-1;i>=0;i--){var p=parts[i];p.life-=dt;if(p.life<=0){parts.splice(i,1);continue}p.vy+=p.g*dt;if(p.k===0){p.vx*=0.985;p.vy=Math.min(p.vy,160*U);p.r+=p.vr*dt}p.x+=p.vx*dt;p.y+=p.vy*dt}}
+function star(x,y,r){ctx.beginPath();for(var i=0;i<10;i++){var a=i*Math.PI/5-Math.PI/2,rr=i%2?r*0.45:r;ctx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}ctx.closePath();ctx.fill()}
+function drawParts(){for(var i=0;i<parts.length;i++){var p=parts[i];ctx.globalAlpha=Math.min(1,p.life*2);ctx.fillStyle=p.c;if(p.k===0){ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.scale(1,Math.cos(p.r*2.3));ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()}else{star(p.x,p.y,p.s)}}ctx.globalAlpha=1}
+var stars=[];for(var si=0;si<220;si++)stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.6+0.3,t:Math.random()*6});
+function drawStars(a,T){if(a<=0)return;ctx.fillStyle='#fff';for(var i=0;i<stars.length;i++){var s=stars[i];ctx.globalAlpha=a*(0.5+0.5*Math.sin(T*2+s.t));ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,7);ctx.fill()}ctx.globalAlpha=1}
+
+/* ===== 描画ヘルパー ===== */
+function txt(s,x,y,size,fill,stroke,lw,align){ctx.font='900 '+size+'px '+FONT;ctx.textAlign=align||'center';ctx.textBaseline='middle';ctx.lineJoin='round';if(stroke){ctx.lineWidth=lw||size*0.2;ctx.strokeStyle=stroke;ctx.strokeText(s,x,y)}ctx.fillStyle=fill;ctx.fillText(s,x,y)}
+function fitSize(s,maxW,size){ctx.font='900 '+size+'px '+FONT;var w=ctx.measureText(s).width;return w>maxW?size*maxW/w:size}
+function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function bubble(s,x,y,size){ctx.font='800 '+size+'px '+FONT;var w=ctx.measureText(s).width+size*1.2,h=size*1.9;x=Math.max(w/2+8,Math.min(W-w/2-8,x));ctx.fillStyle='#fff';ctx.strokeStyle='#2a1640';ctx.lineWidth=2.5;rrect(x-w/2,y-h,w,h,h/2);ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(x-6,y-1);ctx.lineTo(x+2,y+10);ctx.lineTo(x+8,y-1);ctx.closePath();ctx.fill();ctx.fillStyle='#2a1640';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(s,x,y-h/2)}
+function cover(img,yOff,a){var s=Math.max(W/img.width,H/img.height),dw=img.width*s,dh=img.height*s;ctx.globalAlpha=a==null?1:a;ctx.drawImage(img,(W-dw)/2,H-dh+(yOff||0),dw,dh);ctx.globalAlpha=1;return H-dh+(yOff||0)}
+function line(x1,y1,x2,y2,w,c){ctx.strokeStyle=c;ctx.lineWidth=w;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()}
+function circ(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill()}
+
+/* えいこ（上から見た姿。+x が頭の方向） */
+function drawEiko(x,y,s,rot,T,pose){
+  ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.scale(s,s);
+  var w=Math.sin(T*22)*5;
+  // ツインテール
+  ctx.strokeStyle='#6b3a1f';ctx.lineCap='round';ctx.lineWidth=7;
+  for(var k=-1;k<=1;k+=2){ctx.beginPath();ctx.moveTo(40,k*12);ctx.quadraticCurveTo(26,k*(26+w*0.4),8,k*(22+w));ctx.stroke();circ(40,k*13,5,'#ff4f9a')}
+  // 脚
+  line(-8,-5,-40,-8-w*0.5,9,'#26306b');line(-8,5,-40,8+w*0.5,9,'#26306b');
+  circ(-43,-8-w*0.5,5.5,'#fff');circ(-43,8+w*0.5,5.5,'#fff');
+  // 腕
+  if(pose==='chute'){line(14,-8,40,-24,6,'#ffd9c0');line(14,8,40,24,6,'#ffd9c0');circ(41,-25,4.5,'#ffd9c0');circ(41,25,4.5,'#ffd9c0')}
+  else{var sp=pose==='held'?4:9;line(16,-8,52,-sp,6,'#ffd9c0');line(16,8,52,sp,6,'#ffd9c0');circ(53,-sp,4.5,'#ffd9c0');circ(53,sp,4.5,'#ffd9c0')}
+  // 胴体
+  ctx.fillStyle='#ff4f9a';rrect(-14,-12,36,24,10);ctx.fill();
+  ctx.fillStyle='#ffe45c';star(4,0,7);
+  ctx.fillStyle='#fff';ctx.fillRect(-14,-1.5,6,3);
+  // 頭
+  circ(34,0,15,'#ffd9c0');
+  ctx.fillStyle='#6b3a1f';ctx.beginPath();ctx.arc(34,0,16.5,-1.45,1.45);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(44,-13);ctx.quadraticCurveTo(36,-6,40,0);ctx.quadraticCurveTo(36,6,44,13);ctx.fill();
+  // ゴーグル
+  ctx.strokeStyle='#ffd23f';ctx.lineWidth=3.5;ctx.beginPath();ctx.arc(34,0,15.5,-1.1,1.1);ctx.stroke();
+  // 顔
+  ctx.strokeStyle='#2a1640';ctx.lineWidth=2.2;ctx.lineJoin='round';
+  for(var e=-1;e<=1;e+=2){ctx.beginPath();ctx.moveTo(28,e*5.5-3.2);ctx.lineTo(32.5,e*5.5);ctx.lineTo(28,e*5.5+3.2);ctx.stroke()}
+  ctx.globalAlpha=0.6;circ(26,-10,3,'#ff7aa8');circ(26,10,3,'#ff7aa8');ctx.globalAlpha=1;
+  ctx.fillStyle='#c2185b';ctx.beginPath();ctx.arc(24.5,0,4.8,Math.PI/2,Math.PI*1.5);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+/* マッチョ先輩（正面） */
+function drawThrower(x,y,s,hx,hy,T,cheer){
+  ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+  // 影
+  ctx.fillStyle='rgba(0,0,0,.25)';ctx.beginPath();ctx.ellipse(0,2,36,10,0,0,7);ctx.fill();
+  line(-11,-48,-17,-4,15,'#1d4fa8');line(11,-48,17,-4,15,'#1d4fa8');
+  ctx.fillStyle='#fff';rrect(-27,-8,18,9,4);ctx.fill();rrect(9,-8,18,9,4);ctx.fill();
+  ctx.fillStyle='#1d4fa8';rrect(-22,-62,44,20,6);ctx.fill();
+  // 腕（手の位置へ）
+  var lx=(hx-x)/s,ly=(hy-y)/s;
+  if(cheer){line(-28,-104,-46,-150,13,'#e8a57a');line(28,-104,46,-150,13,'#e8a57a');circ(-47,-153,8,'#e8a57a');circ(47,-153,8,'#e8a57a')}
+  else{line(-26,-104,lx-3,ly,13,'#e8a57a');line(26,-104,lx+3,ly,13,'#e8a57a');circ(lx,ly,8,'#e8a57a')}
+  ctx.fillStyle='#e8a57a';rrect(-32,-116,64,58,22);ctx.fill();
+  ctx.fillStyle='#ff3b3b';rrect(-22,-110,44,52,10);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='900 20px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('力',0,-86);
+  circ(0,-136,21,'#e8a57a');
+  ctx.fillStyle='#1b1b1b';ctx.beginPath();ctx.arc(0,-139,21.5,Math.PI*1.05,Math.PI*1.95);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';ctx.fillRect(-21,-147,42,6);ctx.fillStyle='#ff3b3b';ctx.fillRect(16,-147,10,6);
+  ctx.strokeStyle='#1b1b1b';ctx.lineWidth=2.6;ctx.lineCap='round';
+  ctx.beginPath();ctx.arc(-8,-133,3.5,Math.PI*1.1,Math.PI*1.9);ctx.stroke();ctx.beginPath();ctx.arc(8,-133,3.5,Math.PI*1.1,Math.PI*1.9);ctx.stroke();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(0,-126,8,0,Math.PI);ctx.closePath();ctx.fill();ctx.stroke();
+  ctx.restore();
+}
+function parachute(x,y,s,T){
+  ctx.save();ctx.translate(x,y);ctx.scale(s,s);var sw=Math.sin(T*3)*0.08;ctx.rotate(sw);
+  var cols=['#ff4f9a','#ffd23f','#3fd0ff','#7dff6b','#b57bff','#ff7a3f'];
+  for(var i=0;i<6;i++){ctx.fillStyle=cols[i];ctx.beginPath();ctx.moveTo(0,-70);ctx.arc(0,-70,62,Math.PI+i*Math.PI/6,Math.PI+(i+1)*Math.PI/6);ctx.closePath();ctx.fill()}
+  ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=1.5;for(var j=0;j<=6;j++){var a=Math.PI+j*Math.PI/6;ctx.beginPath();ctx.moveTo(Math.cos(a)*62,-70+Math.sin(a)*62*0.2);ctx.lineTo(0,-18);ctx.stroke()}
+  ctx.restore();
+}
+
+/* ===== ゲーム状態 ===== */
+var scene='loading',st=0,T=0;
+var ang=Math.PI*0.5,omega=1.8,holding=false,holdT=0,power=0,bubT=0,bubS='',lastRel=0;
+var throwP=0,bearing=0,distKm=0,destLL=null,landInfo=null,perfect=false,isNew=false;
+var flightD=6,lastCountry='',hud={place:'',km:0},popups=[],flyers=[],flyT=0,eikoS='';
+var relX=0,relY=0;
+var SPIN_BUB=['キャー♪','はやーい！','目がまわる〜♪','たのしー！','いけいけー！','とばしてー！'];
+var FLY_BUB=['地球まるーい！','きもちいいー！','みんな見てるー？','まだまだ飛ぶよー！','ひゃっほーい！','宇宙さんぽ〜♪'];
+function go(s){scene=s;st=0}
+function eikoPos(){var cx=W/2,cy=H*0.66,rx=Math.min(W*0.36,150*U*1.25),ry=rx*0.34;var lift=(26+omega*2.4)*U;return{x:cx+rx*Math.cos(ang),y:cy-ry*Math.sin(ang)-lift-(70*U),cx:cx,cy:cy,rx:rx,ry:ry}}
+
+function update(dt){
+  updParts(dt);shake=Math.max(0,shake-dt*2.2);
+  if(scene==='title'||scene==='spin'){
+    if(scene==='spin'&&holding){holdT+=dt;omega=Math.min(17,2.2+holdT*8);var x=holdT%1.6/0.8;power=x<1?x:2-x;windSet(omega/17)}
+    else{omega+=(1.8-omega)*Math.min(1,dt*2);if(scene==='spin')power=Math.max(0,power-dt*2)}
+    ang+=omega*dt;
+    bubT-=dt;if(bubT<=0){bubT=1.1;bubS=SPIN_BUB[(Math.random()*SPIN_BUB.length)|0]}
+    if(holding&&Math.random()<omega*dt*1.2){var p=eikoPos();spark(p.x,p.y,1,60*U)}
+  }else if(scene==='throwFx'){
+    if(st>2.3){go('rise');whoosh(2.6,300,3000,0.35)}
+  }else if(scene==='rise'){
+    if(Math.random()<dt*8)parts.push({k:1,x:W/2+(Math.random()-.5)*30*U,y:H*0.5,vx:(Math.random()-.5)*80*U,vy:400*U,g:0,s:(3+Math.random()*4)*U,c:CONF[(Math.random()*CONF.length)|0],life:1});
+    if(st>2.8){go('globe');lastCountry='日本';hud.place='日本';popups=[];flyers=[];flyT=1;bubT=0.8;eikoS='';}
+  }else if(scene==='globe'){
+    var k=Math.min(1,st/flightD),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;hud.km=distKm*e;
+    var ll=dest(TOKYO[0],TOKYO[1],bearing,hud.km);
+    var pl=place(ll[0],ll[1],450);hud.place=pl.land?pl.country+(pl.country==='日本'?'（'+pl.city+'）':''):pl.country;
+    if(pl.land&&pl.country!==lastCountry&&pl.country!=='日本'){lastCountry=pl.country;popups.push({s:pl.flag+' '+pl.country+' 上空を通過！',t:0});ding();spark(W/2,H*0.5,18,220*U)}
+    bubT-=dt;if(bubT<=0){bubT=1.8;eikoS=FLY_BUB[(Math.random()*FLY_BUB.length)|0]}
+    flyT-=dt;if(flyT<=0&&k<0.9){flyT=1.2+Math.random()*1.4;var em=['✈️','🛰️','🛸','🦅','🌠','🎈','🚀'][(Math.random()*7)|0];var fromL=Math.random()<.5;flyers.push({e:em,x:fromL?-40:W+40,y:H*(0.25+Math.random()*0.5),vx:(fromL?1:-1)*(180+Math.random()*160)*U,t:0})}
+    for(var i=flyers.length-1;i>=0;i--){var f=flyers[i];f.x+=f.vx*dt;f.t+=dt;if(f.t>6)flyers.splice(i,1)}
+    for(var j=popups.length-1;j>=0;j--){popups[j].t+=dt;if(popups[j].t>2.2)popups.splice(j,1)}
+    if(Math.random()<dt*25){spark(W/2+(Math.random()-.5)*10,H*0.5,1,70*U)}
+    if(st>=flightD+0.25){go('land');popups=[]}
+  }else if(scene==='land'){
+    if(st>2.0&&!landed){landed=true;popS();Platform.haptic(40);confetti(110,W/2,H*0.5,520*U);shake=0.5}
+    if(st>2.5&&!shown){shown=true;showResult()}
+  }else if(scene==='result'){
+    if(Math.random()<dt*3)confetti(3,Math.random()*W,-10,60*U);
+  }
+}
+var landed=false,shown=false;
+
+function drawCityScene(){cover(imgCity,0);var g=ctx.createLinearGradient(0,H*0.55,0,H);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.25)');ctx.fillStyle=g;ctx.fillRect(0,H*0.55,W,H*0.45)}
+function drawSpinRig(cheer){
+  var p=eikoPos(),cx=p.cx,cy=p.cy;
+  // 方角リング
+  ctx.save();ctx.globalAlpha=scene==='spin'?0.95:0.5;
+  ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.setLineDash([8,8]);ctx.beginPath();ctx.ellipse(cx,cy,p.rx*1.18,p.ry*1.18,0,0,7);ctx.stroke();ctx.setLineDash([]);
+  var lab=[['北',0,-1],['東',1,0],['南',0,1],['西',-1,0]];
+  for(var i=0;i<4;i++){var lx=cx+lab[i][1]*p.rx*1.42,ly=cy+lab[i][2]*p.ry*1.55;txt(lab[i][0],lx,ly,18*U,lab[i][0]==='北'?'#ff4f9a':'#fff','#0b1a3a',5)}
+  ctx.restore();
+  // スピードの残像
+  if(omega>3){ctx.save();ctx.globalAlpha=Math.min(.55,(omega-3)/14);ctx.strokeStyle='#fff';ctx.lineWidth=10*U;ctx.lineCap='round';
+    for(var k=1;k<=3;k++){ctx.beginPath();ctx.ellipse(cx,cy-(26+omega*2.4)*U-70*U,p.rx,p.ry,0,-ang-0.18*k*omega/6,-ang-0.05,false);ctx.stroke()}ctx.restore()}
+  var sh=cy-100*U;var dx=p.x-cx,dy=p.y-sh,dl=Math.sqrt(dx*dx+dy*dy)||1;var es=U*(0.95-0.22*Math.sin(ang));
+  var hx=p.x-dx/dl*53*es,hy=p.y-dy/dl*53*es;var rot=Math.atan2(-dy,-dx);
+  var behind=Math.sin(ang)>0;
+  ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(p.x,cy-p.ry*Math.sin(ang)+4,26*es,8*es,0,0,7);ctx.fill();
+  if(behind)drawEiko(p.x,p.y,es,rot,T,'held');
+  drawThrower(cx,cy,U,hx,hy,T,cheer);
+  if(!behind)drawEiko(p.x,p.y,es,rot,T,'held');
+  return p;
+}
+function draw(){
+  ctx.save();
+  if(shake>0)ctx.translate((Math.random()-.5)*shake*30,(Math.random()-.5)*shake*30);
+  if(scene==='title'||scene==='spin'||scene==='loading'){
+    drawCityScene();drawSpinRig(false);
+    if(scene==='spin'){
+      var p=eikoPos();if(bubS)bubble(bubS,p.x,p.y-30*U,14*U);
+      var top=SAT+64;
+      var b=Math.atan2(Math.cos(ang),Math.sin(ang));var tgt=dest(TOKYO[0],TOKYO[1],b,6500),pl=place(tgt[0],tgt[1],1500);
+      ctx.fillStyle='rgba(11,26,58,.78)';rrect(14,top,W-28,46*U+8,16);ctx.fill();
+      txt('いまの方角：'+dirName(b)+'（'+(pl.land?pl.country:pl.country)+'方面）',W/2,top+(46*U+8)/2,fitSize('いまの方角：北西（アラブ首長国連邦方面）',W-52,17*U),'#fff');
+      // パワーゲージ
+      var gy=H-Math.max(SAB,12)-70*U,gw=W-56,gx=28;
+      txt(holding?'はなして投げる！':'画面を長押しで ぐるぐる！',W/2,gy-34*U,fitSize('画面を長押しで ぐるぐる！',W-40,26*U),'#fff36b','#e8186d',7);
+      ctx.fillStyle='rgba(11,26,58,.85)';rrect(gx-4,gy-4,gw+8,30*U+8,14);ctx.fill();
+      var gr=ctx.createLinearGradient(gx,0,gx+gw,0);gr.addColorStop(0,'#3fd0ff');gr.addColorStop(.6,'#ffd23f');gr.addColorStop(1,'#ff2f7d');
+      ctx.fillStyle=gr;rrect(gx,gy,Math.max(12,gw*power),30*U,11);ctx.fill();
+      ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(gx+gw*0.93,gy-2);ctx.lineTo(gx+gw*0.93,gy+30*U+2);ctx.stroke();
+      txt('MAX',gx+gw*0.965,gy+15*U,12*U,'#fff','#e8186d',4);
+      txt('パワー',gx+34*U,gy+15*U,14*U,'#fff','#0b1a3a',4);
+    }
+  }else if(scene==='throwFx'){
+    drawCityScene();
+    var k=st;
+    // 光線
+    ctx.save();ctx.translate(W/2,H*0.36);ctx.rotate(T*0.8);for(var i=0;i<16;i++){ctx.fillStyle=i%2?'rgba(255,226,80,.55)':'rgba(255,120,180,.45)';ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,H,i*Math.PI/8,(i+1)*Math.PI/8);ctx.closePath();ctx.fill()}ctx.restore();
+    var cx=W/2,cy=H*0.66;drawThrower(cx,cy,U,0,0,T,true);
+    // 飛んでいくえいこ
+    var t2=Math.min(1,k/1.2),ex=relX+(W*0.5-relX)*t2,ey=relY+(-80*U-relY)*t2*t2,es=U*(1+t2*0.6)*(1-t2*0.5);
+    for(var r=0;r<6;r++){ctx.globalAlpha=0.5;line(ex,ey,relX+(ex-relX)*0.3,relY+(ey-relY)*0.3+r*2,(14-r*2)*U,CONF[r]);}ctx.globalAlpha=1;
+    drawEiko(ex,ey,es,Math.atan2(ey-relY,ex-relX)+T*0,T,'fly');
+    // 文字
+    var sc=k<0.3?easeBack(k/0.3):1+0.03*Math.sin(k*18);
+    ctx.save();ctx.translate(W/2,H*0.34);ctx.scale(sc,sc);ctx.rotate(-0.06);
+    if(perfect)txt('PERFECT!!',0,-120*U,fitSize('PERFECT!!',W*0.6,40*U),'#7dff6b','#0b3a1a',9);
+    var s1='えいこを',s2='投げ飛ばしましたー！！';
+    var z2=fitSize(s2,W*0.94,52*U);
+    txt(s1,0,-50*U,z2*1.25,'#fff36b','#e8186d',z2*0.34);
+    txt(s2,0,z2*0.75,z2,'#fff36b','#e8186d',z2*0.34);
+    ctx.restore();
+    ctx.globalAlpha=Math.max(0,1-k*4);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;
+  }else if(scene==='rise'){
+    var k=Math.min(1,st/2.8);
+    var g=ctx.createLinearGradient(0,0,0,H);var sp=Math.pow(k,1.3);
+    g.addColorStop(0,mix('#5db5ff','#02030f',sp));g.addColorStop(1,mix('#cdeeff','#0b1a3a',sp));ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    drawStars(Math.max(0,(k-0.45)*2),T);
+    cover(imgCity,Math.pow(k,1.6)*H*1.4+k*H*0.2,1);
+    // 雲
+    for(var c=0;c<7;c++){var cy2=((c*190+st*900*U)%(H+300))-150;var cx2=(c*137%W);ctx.globalAlpha=k<0.75?0.85:Math.max(0,(1-k)*3);cloud(cx2,cy2,(40+c%3*20)*U)}ctx.globalAlpha=1;
+    // スピード線
+    ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=2;for(var l=0;l<18;l++){var lx=(l*53.7%W),ly=((l*97+st*1800)%H);ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(lx,ly+60*U);ctx.stroke()}
+    var ex=W/2+Math.sin(T*3)*10*U,ey=H*0.45;
+    for(var r=0;r<6;r++){ctx.fillStyle=CONF[r];ctx.globalAlpha=0.75;ctx.fillRect(ex-15*U+r*5*U,ey+40*U,5*U,H)}ctx.globalAlpha=1;
+    drawEiko(ex,ey,U*1.35,-Math.PI/2,T,'fly');
+    bubble('ひゃっほーーい！',ex,ey-80*U,16*U);
+    var top=SAT+24;txt('高度 '+fmt(Math.pow(k,2)*400)+' km',W/2,top+20,26*U,'#fff','#0b1a3a',7);
+    txt('ぐんぐん上昇中！',W/2,H-Math.max(SAB,12)-40*U,26*U,'#fff36b','#e8186d',7);
+    if(k>0.85){ctx.globalAlpha=(k-0.85)/0.15;ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1}
+  }else if(scene==='globe'||scene==='land'||scene==='result'){
+    ctx.fillStyle='#02030f';ctx.fillRect(0,0,W,H);
+    var ng=ctx.createRadialGradient(W*0.2,H*0.2,10,W*0.2,H*0.2,W);ng.addColorStop(0,'rgba(120,60,200,.35)');ng.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=ng;ctx.fillRect(0,0,W,H);
+    drawStars(1,T);
+    var Rfit=Math.min(W*0.44,H*0.3),Rnear=Math.max(W,H)*1.4;
+    var Rtrav=Rfit+(Rnear*0.5-Rfit)*(1-Math.min(1,distKm/4000));
+    var cx=W/2,cy=H*0.54,R,ll,km;
+    if(scene==='globe'){
+      var k=Math.min(1,st/flightD),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;km=distKm*e;
+      var z=Math.min(1,st/1.3),ze=1-Math.pow(1-z,3);R=Rnear+(Rtrav-Rnear)*ze;
+      ll=dest(TOKYO[0],TOKYO[1],bearing,km);
+    }else{
+      km=distKm;ll=destLL;var z2=Math.min(1,st/1.5),ze2=z2<.5?4*z2*z2*z2:1-Math.pow(-2*z2+2,3)/2;R=Rtrav+(Rnear*1.1-Rtrav)*ze2;cy=H*0.54+(H*0.34-H*0.54)*ze2;
+    }
+    drawGlobe(ll[0],ll[1],R,cx,cy);
+    // 軌跡
+    var N=70;ctx.lineCap='round';ctx.lineJoin='round';var prev=null;
+    for(var i=0;i<=N;i++){var q=dest(TOKYO[0],TOKYO[1],bearing,km*i/N);var pp=proj(q[0],q[1],ll[0],ll[1],R,cx,cy);
+      if(prev&&prev.v&&pp.v){ctx.strokeStyle='hsla('+((i*7+T*200)%360)+',100%,62%,.95)';ctx.lineWidth=6*U;ctx.beginPath();ctx.moveTo(prev.x,prev.y);ctx.lineTo(pp.x,pp.y);ctx.stroke()}prev=pp}
+    var tk=proj(TOKYO[0],TOKYO[1],ll[0],ll[1],R,cx,cy);if(tk.v){circ(tk.x,tk.y,7*U,'#fff');circ(tk.x,tk.y,5*U,'#ff2f2f');if(km>300)txt('東京',tk.x,tk.y-16*U,14*U,'#fff','#0b1a3a',4)}
+    if(scene==='globe'){
+      var ah=dest(TOKYO[0],TOKYO[1],bearing,km+300),pa=proj(ah[0],ah[1],ll[0],ll[1],R,cx,cy);var rot=Math.atan2(pa.y-cy,pa.x-cx);
+      var bob=Math.sin(T*4)*5*U;
+      ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(cx,cy+6*U,22*U,7*U,0,0,7);ctx.fill();
+      ctx.save();ctx.shadowColor='#fff36b';ctx.shadowBlur=20;drawEiko(cx,cy-24*U+bob,U*0.95,rot,T,'fly');ctx.restore();
+      if(eikoS)bubble(eikoS,cx,cy-70*U+bob,14*U);
+      for(var f=0;f<flyers.length;f++){var fl=flyers[f];ctx.font=(34*U)+'px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.save();ctx.translate(fl.x,fl.y+Math.sin(fl.t*4)*8);if(fl.vx<0)ctx.scale(-1,1);ctx.fillText(fl.e,0,0);ctx.restore();if(fl.t<1.6&&fl.x>30&&fl.x<W-30)bubble('えっ!?',fl.x,fl.y-24*U,12*U)}
+      var top=SAT+14;
+      ctx.fillStyle='rgba(11,26,58,.75)';rrect(14,top,W-28,92*U,20);ctx.fill();
+      txt(fmt(km)+' km',W/2,top+34*U,fitSize(fmt(20000)+' km',W*0.7,44*U),'#fff36b','#e8186d',8);
+      txt('📍 '+hud.place+' 上空',W/2,top+72*U,fitSize('📍 '+hud.place+' 上空',W-50,18*U),'#fff');
+      for(var pi=0;pi<popups.length;pi++){var pu=popups[pi],a=pu.t<0.25?pu.t/0.25:pu.t>1.8?(2.2-pu.t)/0.4:1;ctx.globalAlpha=Math.max(0,a);var py=top+92*U+40*U+pi*44*U,sz=fitSize(pu.s,W-40,22*U);ctx.save();ctx.translate(W/2,py);var sc=pu.t<0.25?0.6+0.4*easeBack(pu.t/0.25):1;ctx.scale(sc,sc);txt(pu.s,0,0,sz,'#fff','#ff2f7d',7);ctx.restore();ctx.globalAlpha=1}
+      txt('びゅーーーん！！',W/2,H-Math.max(SAB,12)-36*U,30*U,'#fff36b','#e8186d',8);
+    }else{
+      var y0=-120*U,yEnd=cy-14*U,t3=Math.min(1,Math.max(0,(st-0.7)/1.3)),ey=y0+(yEnd-y0)*(1-Math.pow(1-t3,2));
+      if(st>0.7){parachute(cx,ey,U*(scene==='result'?1:1),T);drawEiko(cx,ey,U*1.05,-Math.PI/2,T,'chute')}
+      if(landed){
+        var sc2=Math.min(1,(st-2.0)*4);if(scene==='result')sc2=1;
+        ctx.save();ctx.translate(W/2,SAT+64*U);ctx.scale(sc2,sc2);txt('着地〜！',0,0,48*U,'#fff36b','#e8186d',10);ctx.restore();
+        ctx.font=(56*U)+'px '+FONT;ctx.textAlign='center';ctx.fillText(landInfo.flag,cx+70*U,cy-40*U);
+      }
+    }
+  }
+  drawParts();
+  ctx.restore();
+}
+function cloud(x,y,r){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.arc(x+r*0.9,y+r*0.2,r*0.75,0,7);ctx.arc(x-r*0.9,y+r*0.25,r*0.7,0,7);ctx.fill()}
+function easeBack(x){var c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2)}
+function mix(a,b,t){var pa=parseInt(a.slice(1),16),pb=parseInt(b.slice(1),16);var r=Math.round(((pa>>16)&255)*(1-t)+((pb>>16)&255)*t),g=Math.round(((pa>>8)&255)*(1-t)+((pb>>8)&255)*t),bl=Math.round((pa&255)*(1-t)+(pb&255)*t);return'rgb('+r+','+g+','+bl+')'}
+
+/* ===== 入力 ===== */
+cv.addEventListener('pointerdown',function(e){e.preventDefault();unlock();if(scene==='spin'&&!holding&&T-lastRel>0.3){holding=true;holdT=0;power=0;windStart();Platform.haptic(10)}});
+function release(){if(!holding)return;holding=false;lastRel=T;if(holdT<0.45){windStop();toast('長押ししてから、はなしてね！');return}throwIt()}
+cv.addEventListener('pointerup',release);cv.addEventListener('pointercancel',release);cv.addEventListener('pointerleave',release);
+document.addEventListener('touchmove',function(e){if(e.target===cv)e.preventDefault()},{passive:false});
+
+function throwIt(){
+  windStop();throwP=power;perfect=power>=0.93;
+  bearing=Math.atan2(Math.cos(ang),Math.sin(ang));
+  distKm=Math.min(19990,60+19900*Math.pow(throwP,1.7)*(perfect?1:0.94+Math.random()*0.06));
+  destLL=dest(TOKYO[0],TOKYO[1],bearing,distKm);landInfo=place(destLL[0],destLL[1],700);
+  flightD=3.6+6.4*(distKm/20000);
+  var p=eikoPos();relX=p.x;relY=p.y;
+  go('throwFx');landed=false;shown=false;
+  playMusic();say('えいこを、投げ飛ばしましたー！');fanfare();whoosh(1.2,600,4000,0.4);
+  confetti(140,W/2,H*0.4,620*U);shake=0.7;Platform.haptic(60);
+  $('bGear').classList.add('hide');
+}
+function showResult(){
+  go('result');
+  data.plays++;var key=landInfo.land?landInfo.country:landInfo.country;
+  var stp=data.stamps[key]||{f:landInfo.flag,n:0,b:0};stp.n++;if(distKm>stp.b)stp.b=Math.round(distKm);data.stamps[key]=stp;
+  isNew=distKm>data.best;if(isNew){data.best=Math.round(distKm);data.bestPlace=landInfo.flag+' '+landInfo.country}
+  saveData();
+  var title,sub,msg;
+  if(landInfo.land){title=landInfo.country;sub=landInfo.city+' 付近に着地';msg=(HELLO[landInfo.country]||landInfo.country+'にとうちゃーく！')+'<br>'+GAGS[(Math.random()*GAGS.length)|0];if(landInfo.city==='ホノルル')msg=HELLO['ハワイ']+'<br>'+GAGS[0];}
+  else{title=landInfo.country;sub=(landInfo.near?'いちばん近い国：'+landInfo.near[2]+' '+landInfo.near[1]:'')+'';msg=landInfo.country+'にぷかぷか着水！<br>'+SEAGAGS[(Math.random()*SEAGAGS.length)|0]}
+  $('card').innerHTML='<div class="lab">🏁 えいこの着地地点</div><div class="flag">'+landInfo.flag+'</div><div class="place">'+title+'</div><div class="city">'+sub+'（'+dirName(bearing)+'の方角）</div>'+
+  '<div class="dist">'+fmt(distKm)+'<small> km</small>'+(isNew?'<span class="new">NEW 自己ベスト！</span>':'')+'</div><div class="rank">'+(perfect?'💯 PERFECT ／ ':'')+rankOf(distKm)+'</div>'+
+  '<div class="msg">えいこ「'+msg+'」<br><small>えいこ「たのしかった〜！もう1回とばして♪」</small></div>'+
+  '<div class="bottom"><button class="btn main" id="bAgain">もう一回投げる！</button><div class="row"><button class="btn gold" id="bShare">📣 シェア</button><button class="btn sub" id="bStamp2">🗺 スタンプ帳</button></div></div>';
+  $('result').classList.remove('hide');$('bGear').classList.remove('hide');
+  $('bAgain').onclick=function(){unlock();startSpin()};
+  $('bShare').onclick=function(){var t='「えいこを投げ飛ばしました」で、えいこを'+landInfo.flag+landInfo.country+(landInfo.land?'（'+landInfo.city+'付近）':'')+'まで '+fmt(distKm)+'km 投げ飛ばしました！【'+rankOf(distKm)+'】';Platform.share(t).then(function(r){if(r==='copied')toast('結果をコピーしました！');else if(r==='fail')toast('シェアできませんでした')})};
+  $('bStamp2').onclick=openStamps;
+}
+function startSpin(){stopMusic();try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}parts=[];$('result').classList.add('hide');$('title').classList.add('hide');$('bGear').classList.remove('hide');holding=false;power=0;go('spin')}
+function toTitle(){stopMusic();$('result').classList.add('hide');$('title').classList.remove('hide');updBest();go('title')}
+
+/* ===== UI ===== */
+var toastTm=null;function toast(s){var t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTm);toastTm=setTimeout(function(){t.classList.remove('show')},2200)}
+function updBest(){$('bestT').textContent=data.best?'🏆 自己ベスト：'+fmt(data.best)+' km（'+data.bestPlace+'）':''}
+function modal(title,html){$('mTitle').textContent=title;$('mBody').innerHTML=html;$('modal').classList.remove('hide')}
+$('mClose').onclick=function(){$('modal').classList.add('hide')};
+$('modal').addEventListener('click',function(e){if(e.target===$('modal'))$('modal').classList.add('hide')});
+function openStamps(){
+  var ks=Object.keys(data.stamps).sort(function(a,b){return data.stamps[b].b-data.stamps[a].b});
+  var countries={};for(var i=0;i<C.length;i++)countries[C[i][1]]=C[i][2];countries['南極']='🇦🇶';
+  var total=Object.keys(countries).length,got=0;for(var j=0;j<ks.length;j++)if(countries[ks[j]])got++;
+  var h='<p style="text-align:center;font-weight:900;margin:4px 0 10px">'+got+' / '+total+' か国・地域 制覇！（海 '+(ks.length-got)+' か所）</p><div class="stamps">';
+  for(var k=0;k<ks.length;k++){var s=data.stamps[ks[k]];h+='<div class="stamp"><div class="f">'+s.f+'</div>'+ks[k]+'<br>'+s.n+'回／最高'+fmt(s.b)+'km</div>'}
+  if(!ks.length)h+='<div class="stamp lock" style="grid-column:1/-1"><div class="f">🗺</div>まだスタンプがありません<br>えいこを投げ飛ばして集めよう！</div>';
+  modal('🗺 スタンプ帳',h+'</div>');
+}
+function openHow(){modal('❓ あそびかた','<ol class="howto"><li>画面を<b>長押し</b>すると、マッチョ先輩がえいこを持ってぐるぐる回ります。</li><li>下の<b>パワーゲージ</b>が上下します。MAXのあたりで指をはなすと遠くまで飛びます。</li><li>指をはなした瞬間、<b>えいこがいる方角</b>へ飛んでいきます（画面上が北）。上の「いまの方角」を見てねらおう！</li><li>日本から世界のどこまで飛べるか挑戦！着地した国はスタンプ帳に集まります。</li></ol><p style="font-size:13px;color:#6b5a80">※えいこは毎回パラシュートや浮き輪で安全に着地します。ゲームの中だけのお話です。</p>')}
+function openSettings(){
+  var h='<div class="set">'+
+  '<div class="tog">🎵 音楽<button id="tM" class="'+(data.music?'on':'off')+'">'+(data.music?'オン':'オフ')+'</button></div>'+
+  '<div class="tog">🗣 投げたときの声<button id="tV" class="'+(data.voice?'on':'off')+'">'+(data.voice?'オン':'オフ')+'</button></div>'+
+  '<button class="btn sub" id="sHow">❓ あそびかた</button>'+
+  '<p><b>データの引継ぎ</b>：記録はこのブラウザだけに保存されます。別のブラウザや端末に移すときは、片方で「コピーして保存」→ もう片方で「貼り付けて復元」。同期はされません。</p>'+
+  '<button class="btn sub" id="sCopy">📋 コピーして保存</button><button class="btn sub" id="sPaste">📥 貼り付けて復元</button>'+
+  '<button class="btn sub" id="sTitle">🏠 タイトルにもどる</button>'+
+  '<button class="btn sub" id="sReset" style="background:#b0124f">🗑 記録をリセット</button></div>';
+  modal('⚙︎ 設定',h);
+  $('tM').onclick=function(){data.music=!data.music;saveData();if(!data.music)stopMusic();else if(scene==='result'||scene==='globe'||scene==='land')playMusic();openSettings()};
+  $('tV').onclick=function(){data.voice=!data.voice;saveData();openSettings()};
+  $('sHow').onclick=openHow;
+  $('sTitle').onclick=function(){$('modal').classList.add('hide');toTitle()};
+  $('sCopy').onclick=function(){var s=JSON.stringify(data);Platform.copy(s).then(function(ok){if(ok)toast('コピーしました。メモ等に貼り付けて保管してください');else{modal('📋 コピーして保存','<p style="font-size:14px">下の文字をすべて選択してコピーしてください。</p><textarea readonly>'+s.replace(/</g,'&lt;')+'</textarea>')}})};
+  $('sPaste').onclick=function(){modal('📥 貼り付けて復元','<p style="font-size:14px">「コピーして保存」した文字を貼り付けてください。<b>今の記録は上書きされます。</b></p><textarea id="pTa" placeholder="ここに貼り付け"></textarea><div class="row" style="margin-top:10px"><button class="btn sub" id="pCancel">キャンセル</button><button class="btn main" id="pOk" style="font-size:18px;min-height:52px">上書きして復元</button></div>');
+    $('pCancel').onclick=function(){$('modal').classList.add('hide')};
+    $('pOk').onclick=function(){var v=$('pTa').value.trim();if(!v){toast('貼り付けてください');return}try{var o=JSON.parse(v);if(!o||o.v!==1||typeof o.stamps!=='object'||typeof o.best!=='number')throw 0;data=o;saveData();updBest();$('modal').classList.add('hide');toast('復元しました！')}catch(e){toast('形式がちがいます。コピーした文字を全部貼り付けてね')}}};
+  var armed=false;$('sReset').onclick=function(){if(!armed){armed=true;this.textContent='もう一度押すとリセットします';return}data={v:1,best:0,bestPlace:'',plays:0,stamps:{},music:data.music,voice:data.voice};saveData();updBest();$('modal').classList.add('hide');toast('リセットしました')};
+}
+$('bGear').onclick=function(){if(holding)return;openSettings()};
+$('bStart').onclick=function(){unlock();startSpin()};
+$('bStamp').onclick=openStamps;$('bHow').onclick=openHow;
+
+/* ===== 起動 ===== */
+var lastTs=0;
+function loop(ts){var dt=lastTs?Math.min(0.05,(ts-lastTs)/1000):0.016;lastTs=ts;st+=dt;T+=dt;try{update(dt);draw()}catch(e){if(!loaded)fatal(e.message);else console.error(e)}requestAnimationFrame(loop)}
+function boot(){
+  try{
+    resize();initGL(imgEarth);buildMask(imgEarth);
+    bgm=new Audio(ASSET_SONG);bgm.loop=true;bgm.preload='auto';
+    loaded=true;$('load').classList.add('hide');$('title').classList.remove('hide');$('bGear').classList.remove('hide');updBest();go('title');
+    window.__eiko={place:place,get scene(){return scene},setPower:function(p,a){holding=true;holdT=1;power=p;if(a!=null)ang=a;release()}};
+    requestAnimationFrame(loop);
+  }catch(e){fatal(e.message)}
+}
+})();
+</script>
+<!--TAIL_START--></body>
+</html><!--TAIL_END-->

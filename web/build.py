@@ -1,0 +1,12 @@
+import base64,re,sys,os
+d=os.path.dirname(os.path.abspath(__file__))
+src=open(os.path.join(d,'src/game.html'),encoding='utf-8').read()
+def b64(p,m):return 'data:%s;base64,'%m+base64.b64encode(open(os.path.join(d,'assets',p),'rb').read()).decode()
+src=src.replace('__EARTH__',b64('earth.jpg','image/jpeg')).replace('__CITY__',b64('city.jpg','image/jpeg')).replace('__SONG__',b64('song.mp3','audio/mpeg'))
+full=re.sub(r'<!--(HEAD|BODY|TAIL)_(START|END)-->','',src)
+open(os.path.join(d,'index.html'),'w',encoding='utf-8').write(full)
+art=re.sub(r'<!--(HEAD|BODY|TAIL)_START-->.*?<!--\1_END-->','',src,flags=re.S)
+art=art.replace(':root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);',':root{--sat:0px;--sab:0px;')
+out=sys.argv[1] if len(sys.argv)>1 else os.path.join(d,'artifact.html')
+open(out,'w',encoding='utf-8').write(art)
+print(len(full),len(art))

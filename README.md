@@ -1,1 +1,12 @@
-# eiko
+# えいこを投げ飛ばしました
+
+ハンマー投げの要領で「えいこ」を投げ飛ばし、日本から世界のどこまで届くかを競うiPhone向けHTMLゲーム。
+
+- 遊ぶファイル：`web/index.html`（単一HTML・オフライン動作）
+- ソース：`web/src/game.html`、素材：`web/assets/`
+- ビルド：`python3 web/build.py`（素材をBase64で埋め込み `web/index.html` を生成）
+
+素材
+- 地球：NASA Blue Marble（パブリックドメイン）
+- 街の背景：AI生成画像
+- 曲：ユーザー提供の動画から音声のみを抽出
