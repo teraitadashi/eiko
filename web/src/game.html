@@ -184,7 +184,7 @@ var W=430,H=932,DPR=1,SAT=0,SAB=0,U=1;
 var FONT='-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif';
 var gc=document.createElement('canvas'),gl=null,GLP=null,GDPR=1;
 function resize(){
-  DPR=Math.min(window.devicePixelRatio||1,3);W=window.innerWidth||430;H=window.innerHeight||932;
+  DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth||430;H=window.innerHeight||932;
   cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);
   var cs=getComputedStyle($('sa'));SAT=parseFloat(cs.paddingTop)||0;SAB=parseFloat(cs.paddingBottom)||0;
   U=Math.min(W/430,H/800);
@@ -307,22 +307,30 @@ var MAN_H=182;
 // 回転中の見え方（えいこの方向 0°=右, 90°=奥, 270°=手前）：[画像, 左右反転]
 var FRAMES=[['s',1],['b',1],['b',1],['b',-1],['s',-1],['fr',-1],['f',1],['fr',1]];
 var ANCH={s:0.363,f:0.502,fr:0.419,b:0.492,cheer:0.5};
+var HOFF={s:-0.0626,f:-0.004,fr:-0.094,b:-0.006};
 function drawManImg(key,flip,x,y,s,alpha,sx){sx=sx||1;var im=IM[key];if(!im||!im.width)return;var h=MAN_H*s,w=h*im.width/im.height,ax=ANCH[key];ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);ctx.scale(flip*sx,1);ctx.drawImage(im,-w*ax,-h,w,h);ctx.restore()}
+function manComposite(x,y,s,a,alpha){
+  // 8方向の写真を角度の近さで重み付けし、常に連続してブレンドする
+  var deg=((a*180/Math.PI)%360+360)%360,ws={},keys=[];
+  for(var i=0;i<8;i++){var d=Math.abs(deg-i*45);if(d>180)d=360-d;if(d>=60)continue;
+    var w=Math.cos(d/60*Math.PI/2);w*=w;var id=FRAMES[i][0]+(FRAMES[i][1]>0?'+':'-');
+    if(!ws[id]){ws[id]={k:FRAMES[i][0],f:FRAMES[i][1],w:0,d:999};keys.push(id)}ws[id].w+=w;if(d<ws[id].d)ws[id].d=d}
+  keys.sort(function(p,q){return ws[q].w-ws[p].w});
+  var A=ws[keys[0]],B=keys.length>1?ws[keys[1]]:null;
+  function sx(o){var r=Math.min(1,o.d/45);return 1-0.2*r*r}
+  // 重ねる2枚の頭の位置をそろえて、二重に見えるのを減らす
+  var h=MAN_H*s,ha=HOFF[A.k]*A.f*h,hb=B?HOFF[B.k]*B.f*h:ha,wa=B?A.w/(A.w+B.w):1,tg=ha*wa+hb*(1-wa);
+  drawManImg(A.k,A.f,x+(tg-ha)*0.8,y,s,alpha,sx(A));
+  if(B){var t=Math.min(1,2*B.w/(A.w+B.w));t=t*t*(3-2*t);if(t>0.01)drawManImg(B.k,B.f,x+(tg-hb)*0.8,y,s,alpha*t,sx(B))}
+}
 function drawMan(x,y,s,a,cheer){
   ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(x,y-2*s,40*s,10*s,0,0,7);ctx.fill();
   if(cheer){drawManImg('cheer',1,x,y,s*1.08,1);return}
-  var u=(((a/(Math.PI/4))%8)+8)%8,i=Math.floor(u),fr=u-i,j=(i+1)%8;
-  var t=Math.min(1,Math.max(0,(fr-0.38)/0.24));t=t*t*(3-2*t);
-  var A=FRAMES[i],B=FRAMES[j];
-  // 遠心力に耐えて体を少し沈める
-  var bob=Math.sin(a*2)*2*s;
-  if(A[0]===B[0]&&A[1]===B[1]){drawManImg(A[0],A[1],x,y+bob,s,1)}
-  else{
-    // 体をひねって回っているように、切り替わりの前後で横幅を少し縮める
-    var sn=Math.sin(Math.PI*fr),sq=1-0.22*sn*sn,sa=sq,sb=sq;
-    if(t<1)drawManImg(A[0],A[1],x,y+bob,s,1-t*0.9,sa);
-    if(t>0)drawManImg(B[0],B[1],x,y+bob,s,Math.min(1,t*1.2),sb);
-  }
+  var sp=Math.min(1,omega/17);
+  // えいこと反対側へ体重をかけて、なめらかに揺れる
+  var sway=-Math.cos(a)*7*s*(0.4+sp),bob=Math.sin(a*2)*2.5*s;
+  if(omega>7){for(var k=2;k>=1;k--){var aa=a-k*0.018*omega;manComposite(x-Math.cos(aa)*7*s*(0.4+sp),y+Math.sin(aa*2)*2.5*s,s,aa,0.16)}}
+  manComposite(x+sway,y+bob,s,a,1);
 }
 
 function parachute(x,y,s,T){
@@ -345,10 +353,11 @@ function go(s){scene=s;st=0}
 var DK=0.30;
 function rigAt(a){
   var cx=W/2,cy=H*0.79,Mh=MAN_H*U,sp=Math.min(1,omega/17);
+  var sw=-Math.cos(a)*7*U*(0.4+sp)+Math.sin(a)*0;
   var tilt=Mh*0.16*(0.3+sp);var lift=Math.cos(a-Math.PI*0.75)*tilt;
   var Rh=Mh*0.27,hS=Mh*0.78+lift*0.35,L3=Mh*0.84;
   var beta=Math.max(0.04,0.95-omega*0.07),hr=L3*Math.cos(beta),hF=hS+lift-L3*Math.sin(beta);
-  function P(r,h){var X=r*Math.cos(a),Z=r*Math.sin(a),pf=1-0.22*Z/(Mh*1.2);return{x:cx+X*pf,y:cy-h*pf-Z*DK,pf:pf}}
+  function P(r,h){var X=r*Math.cos(a),Z=r*Math.sin(a),pf=1-0.22*Z/(Mh*1.2);return{x:cx+sw+X*pf,y:cy-h*pf-Z*DK,pf:pf}}
   var Hh=P(Rh,hS),F=P(Rh+hr,hF),G=P(Rh+hr*0.5,0);
   return{H:Hh,F:F,G:G,L3:L3,x:(Hh.x+F.x)/2,y:(Hh.y+F.y)/2,cx:cx,cy:cy,rx:Rh+L3,ry:(Rh+L3)*DK,a:a};
 }
@@ -607,13 +616,13 @@ $('bStamp').onclick=openStamps;$('bHow').onclick=openHow;
 
 /* ===== 起動 ===== */
 var lastTs=0;
-function loop(ts){var dt=lastTs?Math.min(0.05,(ts-lastTs)/1000):0.016;lastTs=ts;st+=dt;T+=dt;try{update(dt);draw()}catch(e){if(!loaded)fatal(e.message);else console.error(e)}requestAnimationFrame(loop)}
+var paused=false;function loop(ts){if(paused){requestAnimationFrame(loop);return}var dt=lastTs?Math.min(0.05,(ts-lastTs)/1000):0.016;lastTs=ts;st+=dt;T+=dt;try{update(dt);draw()}catch(e){if(!loaded)fatal(e.message);else console.error(e)}requestAnimationFrame(loop)}
 function boot(){
   try{
     resize();initGL(imgEarth);buildMask(imgEarth);
     bgm=new Audio(ASSET_SONG);bgm.loop=true;bgm.preload='auto';
     loaded=true;$('load').classList.add('hide');$('title').classList.remove('hide');$('bGear').classList.remove('hide');updBest();go('title');
-    window.__eiko={place:place,get scene(){return scene},setPower:function(p,a){holding=true;holdT=1;power=p;if(a!=null)ang=a;release()}};
+    window.__eiko={place:place,frame:function(a,w){paused=true;ang=a;omega=w;parts=[];draw()},get scene(){return scene},setPower:function(p,a){holding=true;holdT=1;power=p;if(a!=null)ang=a;release()}};
     requestAnimationFrame(loop);
   }catch(e){fatal(e.message)}
 }
