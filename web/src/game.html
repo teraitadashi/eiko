@@ -94,7 +94,8 @@ textarea{width:100%;box-sizing:border-box;min-height:140px;font-size:16px;border
 <div id="load"><div>🌏</div><div id="loadMsg">よみこみ中…</div></div>
 <script>
 (function(){'use strict';
-var ASSET_EARTH='__EARTH__',ASSET_CITY='__CITY__',ASSET_SONG='__SONG__',ASSET_PEOPLE={fly:'__EIKO_FLY__',stand:'__EIKO_STAND__',s:'__MAN_S__',f:'__MAN_F__',fr:'__MAN_FR__',b:'__MAN_B__',br:'__MAN_BR__',cheer:'__MAN_CHEER__'};
+var SPIN=__SPIN__;
+var ASSET_EARTH='__EARTH__',ASSET_CITY='__CITY__',ASSET_SONG='__SONG__',ASSET_PEOPLE={fly:'__EIKO_FLY__',stand:'__EIKO_STAND__',cheer:'__MAN_CHEER__'};
 var $=function(id){return document.getElementById(id)};
 var loaded=false;
 function fatal(msg){var l=$('load');l.classList.remove('hide');$('loadMsg').innerHTML='よみこめませんでした<br><small style="font-weight:600">（'+String(msg).replace(/</g,'&lt;')+'）</small><br><small style="font-weight:600">開きなおしてみてね</small>';}
@@ -241,10 +242,11 @@ function proj(lat,lon,la0,lo0,R,cx,cy){
 /* ===== アセット ===== */
 var IM={},imgCity=new Image(),imgEarth=new Image(),nLoaded=0;
 var bgm=null;
-function onAsset(){nLoaded++;if(nLoaded===10)boot()}
+function onAsset(){nLoaded++;if(nLoaded===5+SPIN.frames.length)boot()}
 imgCity.onload=onAsset;imgEarth.onload=onAsset;
 imgCity.onerror=imgEarth.onerror=function(){fatal('画像')};
 imgCity.src=ASSET_CITY;imgEarth.src=ASSET_EARTH;
+SPIN.frames.forEach(function(fr){var im=new Image();im.onload=onAsset;im.onerror=function(){fatal('回転の画像')};im.src=fr.src;fr.im=im});
 Object.keys(ASSET_PEOPLE).forEach(function(k){var im=new Image();im.onload=onAsset;im.onerror=function(){fatal('人物画像')};im.src=ASSET_PEOPLE[k];IM[k]=im});
 
 /* ===== 音 ===== */
@@ -361,7 +363,16 @@ function rigAt(a){
   var Hh=P(Rh,hS),F=P(Rh+hr,hF),G=P(Rh+hr*0.5,0);
   return{H:Hh,F:F,G:G,L3:L3,x:(Hh.x+F.x)/2,y:(Hh.y+F.y)/2,cx:cx,cy:cy,rx:Rh+L3,ry:(Rh+L3)*DK,a:a};
 }
-function eikoPos(){return rigAt(ang)}
+// 動画から取り出した48方向のコマ（0°=えいこが右、90°=奥）
+var SPIN_MANH=168;
+function spinGeom(){var cx=W/2,cy=H*0.79,dh=SPIN_MANH*U/SPIN.manFrac,dw=dh*SPIN.w/SPIN.h,up=dh*SPIN.ay;return{cx:cx,cy:cy,dh:dh,dw:dw,up:up}}
+function spinIdx(a){var n=SPIN.frames.length,u=((a/(Math.PI*2))%1+1)%1*n,i=Math.floor(u);return{i:i%n,j:(i+1)%n,t:u-i}}
+function eikoPos(){var g=spinGeom(),k=spinIdx(ang),A=SPIN.frames[k.i],B=SPIN.frames[k.j];
+  var ex=A.ex+(B.ex-A.ex)*k.t,ey=A.ey+(B.ey-A.ey)*k.t,rx=SPIN.reach*g.up;
+  return{x:g.cx+ex*g.up,y:g.cy+ey*g.up,cx:g.cx,cy:g.cy,rx:rx,ry:rx*0.28}}
+function drawSpinFrame(a,alpha){var g=spinGeom(),k=spinIdx(a),A=SPIN.frames[k.i],B=SPIN.frames[k.j],x=g.cx-g.dw/2,y=g.cy-g.up;
+  ctx.globalAlpha=alpha;ctx.drawImage(A.im,x,y,g.dw,g.dh);
+  var t=k.t;t=t*t*(3-2*t);if(t>0.02){ctx.globalAlpha=alpha*t;ctx.drawImage(B.im,x,y,g.dw,g.dh)}ctx.globalAlpha=1}
 function drawHeldEiko(r,alpha){
   var im=IM.fly,st=IM.stand;if(!im||!im.width||!st||!st.width)return;
   var dx=r.H.x-r.F.x,dy=r.H.y-r.F.y,len=Math.sqrt(dx*dx+dy*dy),pf=(r.H.pf+r.F.pf)/2,full=r.L3*pf;
@@ -416,14 +427,13 @@ function drawSpinRig(cheer){
   ctx.save();ctx.globalAlpha=scene==='spin'?0.95:0.5;
   ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.setLineDash([8,8]);ctx.beginPath();ctx.ellipse(cx,cy,p.rx*1.08,p.ry*1.08,0,0,7);ctx.stroke();ctx.setLineDash([]);
   var lab=[['北',0,-1],['東',1,0],['南',0,1],['西',-1,0]];
-  for(var i=0;i<4;i++){var lx=cx+lab[i][1]*p.rx*1.08,ly=cy+lab[i][2]*p.ry*1.08+(lab[i][2]?lab[i][2]*14*U:-14*U);txt(lab[i][0],lx,ly,18*U,lab[i][0]==='北'?'#ff4f9a':'#fff','#0b1a3a',5)}
+  for(var i=0;i<4;i++){var lx=Math.max(20*U,Math.min(W-20*U,cx+lab[i][1]*p.rx*1.08)),ly=cy+lab[i][2]*p.ry*1.08+(lab[i][2]?lab[i][2]*14*U:-14*U);txt(lab[i][0],lx,ly,18*U,lab[i][0]==='北'?'#ff4f9a':'#fff','#0b1a3a',5)}
   ctx.restore();
-  var behind=Math.sin(ang)>0;
-  ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(p.G.x,p.G.y,46*U*p.G.pf,10*U*p.G.pf,0,0,7);ctx.fill();
-  function eik(){if(omega>5){for(var k=3;k>=1;k--)drawHeldEiko(rigAt(ang-k*0.022*omega),0.13)}drawHeldEiko(p,1)}
-  if(behind)eik();
-  drawMan(cx,cy,U,ang,cheer);
-  if(!behind)eik();
+  ctx.fillStyle='rgba(0,0,0,.22)';ctx.beginPath();ctx.ellipse(cx,cy-2*U,46*U,10*U,0,0,7);ctx.fill();
+  var ep=eikoPos();ctx.fillStyle='rgba(0,0,0,.12)';ctx.beginPath();ctx.ellipse(cx+(ep.x-cx)*0.9,cy-p.ry*Math.sin(ang)*0.5,40*U,8*U,0,0,7);ctx.fill();
+  // 速く回すほど残像を重ねて、振り回されている勢いを出す
+  if(omega>4){var gn=omega>10?3:2;for(var k=gn;k>=1;k--)drawSpinFrame(ang-k*0.02*omega,0.16)}
+  drawSpinFrame(ang,1);
   if(omega>8&&Math.random()<0.5)parts.push({k:1,x:cx+(Math.random()-.5)*60*U,y:cy-2,vx:(Math.random()-.5)*120*U,vy:-30*U,g:60,s:2*U,c:'rgba(230,220,200,.8)',life:0.5});
   return p;
 }
@@ -453,7 +463,7 @@ function draw(){
     var k=st;
     // 光線
     ctx.save();ctx.translate(W/2,H*0.36);ctx.rotate(T*0.8);for(var i=0;i<16;i++){ctx.fillStyle=i%2?'rgba(255,226,80,.55)':'rgba(255,120,180,.45)';ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,H,i*Math.PI/8,(i+1)*Math.PI/8);ctx.closePath();ctx.fill()}ctx.restore();
-    var cx=W/2,cy=H*0.79;drawMan(cx,cy,U,0,true);
+    var cx=W/2,cy=H*0.79;drawMan(cx,cy,U*0.9,0,true);
     // 飛んでいくえいこ
     var t2=Math.min(1,k/1.2),ex=relX+(W*0.5-relX)*t2,ey=relY+(-80*U-relY)*t2*t2,es=U*(1+t2*0.6)*(1-t2*0.5);
     for(var r=0;r<6;r++){ctx.globalAlpha=0.5;line(ex,ey,relX+(ex-relX)*0.3,relY+(ey-relY)*0.3+r*2,(14-r*2)*U,CONF[r]);}ctx.globalAlpha=1;
