@@ -94,7 +94,7 @@ textarea{width:100%;box-sizing:border-box;min-height:140px;font-size:16px;border
 <div id="load"><div>🌏</div><div id="loadMsg">よみこみ中…</div></div>
 <script>
 (function(){'use strict';
-var ASSET_EARTH='__EARTH__',ASSET_CITY='__CITY__',ASSET_SONG='__SONG__',ASSET_PEOPLE={fly:'__EIKO_FLY__',stand:'__EIKO_STAND__',s:'__MAN_S__',f:'__MAN_F__',fr:'__MAN_FR__',b:'__MAN_B__',cheer:'__MAN_CHEER__'};
+var ASSET_EARTH='__EARTH__',ASSET_CITY='__CITY__',ASSET_SONG='__SONG__',ASSET_PEOPLE={fly:'__EIKO_FLY__',stand:'__EIKO_STAND__',s:'__MAN_S__',f:'__MAN_F__',fr:'__MAN_FR__',b:'__MAN_B__',br:'__MAN_BR__',cheer:'__MAN_CHEER__'};
 var $=function(id){return document.getElementById(id)};
 var loaded=false;
 function fatal(msg){var l=$('load');l.classList.remove('hide');$('loadMsg').innerHTML='よみこめませんでした<br><small style="font-weight:600">（'+String(msg).replace(/</g,'&lt;')+'）</small><br><small style="font-weight:600">開きなおしてみてね</small>';}
@@ -241,7 +241,7 @@ function proj(lat,lon,la0,lo0,R,cx,cy){
 /* ===== アセット ===== */
 var IM={},imgCity=new Image(),imgEarth=new Image(),nLoaded=0;
 var bgm=null;
-function onAsset(){nLoaded++;if(nLoaded===9)boot()}
+function onAsset(){nLoaded++;if(nLoaded===10)boot()}
 imgCity.onload=onAsset;imgEarth.onload=onAsset;
 imgCity.onerror=imgEarth.onerror=function(){fatal('画像')};
 imgCity.src=ASSET_CITY;imgEarth.src=ASSET_EARTH;
@@ -305,23 +305,23 @@ function drawEiko(x,y,s,rot,T,pose){
 function drawEikoStand(x,y,s){var im=IM.stand;if(!im||!im.width)return;var h=135*s,w=h*im.width/im.height;ctx.drawImage(im,x-w/2,y,w,h)}
 var MAN_H=182;
 // 回転中の見え方（えいこの方向 0°=右, 90°=奥, 270°=手前）：[画像, 左右反転]
-var FRAMES=[['s',1],['b',1],['b',1],['b',-1],['s',-1],['fr',-1],['f',1],['fr',1]];
-var ANCH={s:0.363,f:0.502,fr:0.419,b:0.492,cheer:0.5};
-var HOFF={s:-0.0626,f:-0.004,fr:-0.094,b:-0.006};
+var FRAMES=[['s',1],['br',1],['b',1],['br',-1],['s',-1],['fr',-1],['f',1],['fr',1]];
+var ANCH={s:0.484,f:0.501,fr:0.483,b:0.495,br:0.624,cheer:0.5};
+var HOFF={s:-0.075,f:-0.005,fr:-0.1337,b:-0.0186,br:0.1824};
 function drawManImg(key,flip,x,y,s,alpha,sx){sx=sx||1;var im=IM[key];if(!im||!im.width)return;var h=MAN_H*s,w=h*im.width/im.height,ax=ANCH[key];ctx.save();ctx.globalAlpha=alpha;ctx.translate(x,y);ctx.scale(flip*sx,1);ctx.drawImage(im,-w*ax,-h,w,h);ctx.restore()}
 function manComposite(x,y,s,a,alpha){
   // 8方向の写真を角度の近さで重み付けし、常に連続してブレンドする
   var deg=((a*180/Math.PI)%360+360)%360,ws={},keys=[];
-  for(var i=0;i<8;i++){var d=Math.abs(deg-i*45);if(d>180)d=360-d;if(d>=60)continue;
-    var w=Math.cos(d/60*Math.PI/2);w*=w;var id=FRAMES[i][0]+(FRAMES[i][1]>0?'+':'-');
+  for(var i=0;i<8;i++){var d=Math.abs(deg-i*45);if(d>180)d=360-d;if(d>=45)continue;
+    var w=Math.cos(d/45*Math.PI/2);w*=w;var id=FRAMES[i][0]+(FRAMES[i][1]>0?'+':'-');
     if(!ws[id]){ws[id]={k:FRAMES[i][0],f:FRAMES[i][1],w:0,d:999};keys.push(id)}ws[id].w+=w;if(d<ws[id].d)ws[id].d=d}
   keys.sort(function(p,q){return ws[q].w-ws[p].w});
   var A=ws[keys[0]],B=keys.length>1?ws[keys[1]]:null;
   function sx(o){var r=Math.min(1,o.d/45);return 1-0.2*r*r}
   // 重ねる2枚の頭の位置をそろえて、二重に見えるのを減らす
   var h=MAN_H*s,ha=HOFF[A.k]*A.f*h,hb=B?HOFF[B.k]*B.f*h:ha,wa=B?A.w/(A.w+B.w):1,tg=ha*wa+hb*(1-wa);
-  drawManImg(A.k,A.f,x+(tg-ha)*0.8,y,s,alpha,sx(A));
-  if(B){var t=Math.min(1,2*B.w/(A.w+B.w));t=t*t*(3-2*t);if(t>0.01)drawManImg(B.k,B.f,x+(tg-hb)*0.8,y,s,alpha*t,sx(B))}
+  drawManImg(A.k,A.f,x+(tg-ha)*0.6,y,s,alpha,sx(A));
+  if(B){var rr=B.w/(A.w+B.w),t=Math.min(1,Math.max(0,(rr-0.3)/0.2));t=t*t*(3-2*t);if(t>0.01)drawManImg(B.k,B.f,x+(tg-hb)*0.6,y,s,alpha*t,sx(B))}
 }
 function drawMan(x,y,s,a,cheer){
   ctx.fillStyle='rgba(0,0,0,.28)';ctx.beginPath();ctx.ellipse(x,y-2*s,40*s,10*s,0,0,7);ctx.fill();
