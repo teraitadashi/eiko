@@ -36,6 +36,7 @@ text-shadow:0 0 0 #000,3px 3px 0 #e8186d,-3px -3px 0 #e8186d,3px -3px 0 #e8186d,
 .row{display:flex;gap:10px}.row .btn{flex:1}
 .best{text-align:center;font-weight:800;font-size:14px;text-shadow:0 1px 3px #000;min-height:18px}
 .gear{position:fixed;right:12px;top:calc(var(--sat) + 10px);width:46px;height:46px;border-radius:50%;border:2px solid rgba(255,255,255,.75);background:rgba(11,26,58,.7);color:#fff;font-size:24px;z-index:20;display:flex;align-items:center;justify-content:center;padding:0}
+.gear.home{right:auto;left:12px;font-size:22px}
 .gear:active{transform:scale(.9)}
 #result{justify-content:flex-end}
 .card{background:linear-gradient(180deg,rgba(255,255,255,.97),rgba(255,240,248,.97));color:#2a1640;border-radius:26px;padding:16px 16px 14px;box-shadow:0 12px 40px rgba(0,0,0,.45);text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1) both;max-height:calc(100% - 70px);overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -89,6 +90,7 @@ textarea{width:100%;box-sizing:border-box;min-height:140px;font-size:16px;border
 </div>
 <div id="result" class="ov hide"><div id="card" class="card"></div></div>
 <button id="bGear" class="gear hide" aria-label="設定">⚙︎</button>
+<button id="bHome" class="gear home hide" aria-label="ホームにもどる">🏠</button>
 <div id="modal" class="modal hide"><div class="sheet"><h2 id="mTitle"></h2><div id="mBody" class="scroll"></div><button id="mClose" class="btn sub">とじる</button></div></div>
 <div id="toast"></div>
 <div id="load"><div>🌏</div><div id="loadMsg">よみこみ中…</div></div>
@@ -351,7 +353,7 @@ var flightD=6,lastCountry='',hud={place:'',km:0},popups=[],flyers=[],flyT=0,eiko
 var relX=0,relY=0;
 var SPIN_BUB=['キャー♪','はやーい！','目がまわる〜♪','たのしー！','いけいけー！','とばしてー！'];
 var FLY_BUB=['地球まるーい！','きもちいいー！','みんな見てるー？','まだまだ飛ぶよー！','ひゃっほーい！','宇宙さんぽ〜♪'];
-function go(s){scene=s;st=0}
+function go(s){scene=s;st=0;var hb=document.getElementById('bHome');if(hb)hb.classList.toggle('hide',s==='title'||s==='loading')}
 var DK=0.30;
 function rigAt(a){
   var cx=W/2,cy=H*0.79,Mh=MAN_H*U,sp=Math.min(1,omega/17);
@@ -522,7 +524,7 @@ function draw(){
       ctx.save();ctx.shadowColor='#fff36b';ctx.shadowBlur=20;drawEiko(cx,cy-24*U+bob,U*0.95,rot,T,'fly');ctx.restore();
       if(eikoS)bubble(eikoS,cx,cy-70*U+bob,14*U);
       for(var f=0;f<flyers.length;f++){var fl=flyers[f];ctx.font=(34*U)+'px '+FONT;ctx.textAlign='center';ctx.textBaseline='middle';ctx.save();ctx.translate(fl.x,fl.y+Math.sin(fl.t*4)*8);if(fl.vx<0)ctx.scale(-1,1);ctx.fillText(fl.e,0,0);ctx.restore();if(fl.t<1.6&&fl.x>30&&fl.x<W-30)bubble('えっ!?',fl.x,fl.y-24*U,12*U)}
-      var top=SAT+14;
+      var top=SAT+64;
       ctx.fillStyle='rgba(11,26,58,.75)';rrect(14,top,W-28,92*U,20);ctx.fill();
       txt(fmt(km)+' km',W/2,top+34*U,fitSize(fmt(20000)+' km',W*0.7,44*U),'#fff36b','#e8186d',8);
       txt('📍 '+hud.place+' 上空',W/2,top+72*U,fitSize('📍 '+hud.place+' 上空',W-50,18*U),'#fff');
@@ -582,7 +584,7 @@ function showResult(){
   $('bStamp2').onclick=openStamps;
 }
 function startSpin(){stopMusic();try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}parts=[];$('result').classList.add('hide');$('title').classList.add('hide');$('bGear').classList.remove('hide');holding=false;power=0;go('spin')}
-function toTitle(){stopMusic();$('result').classList.add('hide');$('title').classList.remove('hide');updBest();go('title')}
+function toTitle(){stopMusic();holding=false;windStop();parts=[];shake=0;popups=[];flyers=[];try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}$('modal').classList.add('hide');$('bGear').classList.remove('hide');$('result').classList.add('hide');$('title').classList.remove('hide');updBest();go('title')}
 
 /* ===== UI ===== */
 var toastTm=null;function toast(s){var t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTm);toastTm=setTimeout(function(){t.classList.remove('show')},2200)}
@@ -621,6 +623,7 @@ function openSettings(){
   var armed=false;$('sReset').onclick=function(){if(!armed){armed=true;this.textContent='もう一度押すとリセットします';return}data={v:1,best:0,bestPlace:'',plays:0,stamps:{},music:data.music,voice:data.voice};saveData();updBest();$('modal').classList.add('hide');toast('リセットしました')};
 }
 $('bGear').onclick=function(){if(holding)return;openSettings()};
+$('bHome').onclick=function(){toTitle()};
 $('bStart').onclick=function(){unlock();startSpin()};
 $('bStamp').onclick=openStamps;$('bHow').onclick=openHow;
 
