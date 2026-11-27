@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 60
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
@@ -41,6 +41,14 @@ jobs:
           mkdir -p ~/.appstoreconnect/private_keys
           printf '%s\n' "$ASC_KEY_P8" > ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
           chmod 600 ~/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8
+
+      - name: Select Xcode 26 (iOS 26 SDK required by App Store Connect)
+        run: |
+          XC=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$XC" ]; then echo "Xcode 26 が見つかりません"; ls -d /Applications/Xcode*; exit 1; fi
+          sudo xcode-select -s "$XC"
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
 
       - name: Archive
         working-directory: eiko-throw/ios/App
