@@ -1,0 +1,17 @@
+{
+  "name": "eiko-throw",
+  "version": "1.0.0",
+  "private": true,
+  "description": "えいこを投げ飛ばしました（iOSアプリ版）",
+  "scripts": {
+    "sync": "mkdir -p www && cp index.html www/index.html && cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^7.2.0",
+    "@capacitor/core": "^7.6.11",
+    "@capacitor/ios": "^7.6.11"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.11"
+  }
+}

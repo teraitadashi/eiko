@@ -1,0 +1,10 @@
+{
+  "appId": "jp.teraitadashi.eikothrow",
+  "appName": "えいこを投げ飛ばしました",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "scheme": "App",
+    "preferredContentMode": "mobile"
+  }
+}

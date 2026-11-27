@@ -1,0 +1,42 @@
+name: asc-check
+# 読み取りのみ。App Store Connect APIの接続とキーの権限を確認する。アップロードや変更はしない。
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      APP_BUNDLE_ID: jp.teraitadashi.eikothrow
+    steps:
+      - name: Check secrets are set
+        run: |
+          for v in ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+            if [ -z "${!v}" ]; then echo "Secret $v が未設定です"; exit 1; fi
+          done
+          echo "secrets: OK"
+      - name: Read-only API check
+        run: |
+          set -euo pipefail
+          KEYFILE="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s\n' "$ASC_KEY_P8" > "$KEYFILE"
+          TOKEN=$(node -e '
+            const c=require("crypto"),fs=require("fs");
+            const key=fs.readFileSync(process.argv[1],"utf8");
+            const b=o=>Buffer.from(JSON.stringify(o)).toString("base64url");
+            const n=Math.floor(Date.now()/1000);
+            const h=b({alg:"ES256",kid:process.env.ASC_KEY_ID,typ:"JWT"});
+            const p=b({iss:process.env.ASC_ISSUER_ID,iat:n,exp:n+900,aud:"appstoreconnect-v1"});
+            const s=c.sign("sha256",Buffer.from(h+"."+p),{key,dsaEncoding:"ieee-p1363"});
+            process.stdout.write(h+"."+p+"."+s.toString("base64url"));
+          ' "$KEYFILE")
+          CODE=$(curl -s -o "$RUNNER_TEMP/apps.json" -w "%{http_code}" -H "Authorization: Bearer $TOKEN" \
+            "https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]=$APP_BUNDLE_ID")
+          echo "HTTP $CODE"
+          if [ "$CODE" != "200" ]; then cat "$RUNNER_TEMP/apps.json"; exit 1; fi
+          COUNT=$(node -e 'const j=require(process.argv[1]);console.log(j.data.length)' "$RUNNER_TEMP/apps.json")
+          echo "app record for $APP_BUNDLE_ID: $COUNT 件（0件ならApp Store Connectでアプリを作成してください）"
+          rm -f "$KEYFILE"

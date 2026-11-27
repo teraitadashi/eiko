@@ -117,7 +117,10 @@ var Ads={
   plugin:function(){try{return(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AdMob)||null}catch(e){return null}},
   init:function(){
     var A=Ads.plugin();if(!A)return;
-    try{A.initialize({}).then(function(){Ads.prepare()}).catch(function(){})}catch(e){}
+    // ATT（トラッキング許可）を先に聞いてから広告を準備する（許可・拒否どちらでも広告は出る）
+    try{A.initialize({}).then(function(){
+      return A.requestTrackingAuthorization().catch(function(){});
+    }).then(function(){Ads.prepare()}).catch(function(){Ads.prepare()})}catch(e){}
   },
   prepare:function(){
     var A=Ads.plugin();if(!A)return;
