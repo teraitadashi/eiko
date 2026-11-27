@@ -33,7 +33,7 @@ jobs:
             const s=c.sign("sha256",Buffer.from(h+"."+p),{key,dsaEncoding:"ieee-p1363"});
             process.stdout.write(h+"."+p+"."+s.toString("base64url"));
           ' "$KEYFILE")
-          CODE=$(curl -s -o "$RUNNER_TEMP/apps.json" -w "%{http_code}" -H "Authorization: Bearer $TOKEN" \
+          CODE=$(curl -g -s -o "$RUNNER_TEMP/apps.json" -w "%{http_code}" -H "Authorization: Bearer $TOKEN" \
             "https://api.appstoreconnect.apple.com/v1/apps?filter[bundleId]=$APP_BUNDLE_ID")
           echo "HTTP $CODE"
           if [ "$CODE" != "200" ]; then cat "$RUNNER_TEMP/apps.json"; exit 1; fi
