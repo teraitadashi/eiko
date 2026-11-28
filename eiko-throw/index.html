@@ -281,8 +281,19 @@ function unlock(){
   ensureAC();
   if(!unlocked&&bgm){unlocked=true;try{bgm.muted=true;var p=bgm.play();if(p&&p.then)p.then(function(){if(!musicOn){bgm.pause();bgm.currentTime=0}bgm.muted=false},function(){bgm.muted=false});else{bgm.pause();bgm.muted=false}}catch(e){bgm.muted=false}}
 }
-function playMusic(){if(!data.music||!bgm)return;musicOn=true;try{bgm.muted=false;bgm.currentTime=0;var p=bgm.play();if(p&&p.catch)p.catch(function(){setTimeout(function(){if(musicOn&&bgm.paused){try{var q=bgm.play();if(q&&q.catch)q.catch(function(){})}catch(e){}}},400)})}catch(e){}}
-function stopMusic(){musicOn=false;if(!bgm)return;try{bgm.pause();bgm.currentTime=0}catch(e){}}
+var bgmBuf=null,bgmSrc=null,bgmGain=null;
+function b64ToBuf(b64){var bin=atob(b64),n=bin.length,u=new Uint8Array(n);for(var i=0;i<n;i++)u[i]=bin.charCodeAt(i);return u.buffer}
+function loadBgm(){ensureAC();if(!AC||bgmBuf)return;try{var b64=ASSET_SONG.split(',')[1];AC.decodeAudioData(b64ToBuf(b64),function(b){bgmBuf=b},function(){})}catch(e){}}
+function playMusic(){
+  if(!data.music)return;musicOn=true;ensureAC();
+  if(AC&&bgmBuf){
+    try{stopBgmSrc();bgmSrc=AC.createBufferSource();bgmSrc.buffer=bgmBuf;bgmSrc.loop=true;bgmGain=AC.createGain();bgmGain.gain.value=0.7;bgmSrc.connect(bgmGain);bgmGain.connect(AC.destination);bgmSrc.start(0);return}catch(e){}
+  }
+  if(!bgm)return;
+  try{bgm.muted=false;bgm.currentTime=0;var p=bgm.play();if(p&&p.catch)p.catch(function(){setTimeout(function(){if(musicOn&&bgm.paused){try{var q=bgm.play();if(q&&q.catch)q.catch(function(){})}catch(e){}}},400)})}catch(e){}
+}
+function stopBgmSrc(){if(bgmSrc){try{bgmSrc.stop()}catch(e){}try{bgmSrc.disconnect()}catch(e){}bgmSrc=null}}
+function stopMusic(){musicOn=false;stopBgmSrc();if(!bgm)return;try{bgm.pause();bgm.currentTime=0}catch(e){}}
 function tone(f,dur,type,vol,slide,delay){
   if(!AC)return;try{var t0=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+dur);
   g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol||0.2,t0+0.015);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g);g.connect(AC.destination);o.start(t0);o.stop(t0+dur+0.05)}catch(e){}
@@ -654,7 +665,7 @@ var paused=false;function loop(ts){if(paused){requestAnimationFrame(loop);return
 function boot(){
   try{
     resize();initGL(imgEarth);buildMask(imgEarth);
-    bgm=new Audio(ASSET_SONG);bgm.loop=true;bgm.preload='auto';
+    bgm=new Audio(ASSET_SONG);bgm.loop=true;bgm.preload='auto';loadBgm();
     loaded=true;$('load').classList.add('hide');$('title').classList.remove('hide');$('bGear').classList.remove('hide');updBest();go('title');
     Ads.init();
     window.__eiko={place:place,frame:function(a,w){paused=true;ang=a;omega=w;parts=[];draw()},get scene(){return scene},setPower:function(p,a){holding=true;holdT=1;power=p;if(a!=null)ang=a;release()}};
