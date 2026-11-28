@@ -129,17 +129,28 @@ var Ads={
     }).then(function(){Ads.prepare()}).catch(function(){Ads.prepare()})}catch(e){}
   },
   prepare:function(){
-    var A=Ads.plugin();if(!A)return;
-    try{A.prepareInterstitial({adId:Ads.unitIdIOS}).then(function(){Ads.ready=true}).catch(function(){Ads.ready=false})}catch(e){Ads.ready=false}
+    var A=Ads.plugin();if(!A)return Promise.resolve(false);
+    if(Ads.loading)return Ads.loading;
+    Ads.loading=new Promise(function(res){
+      try{A.prepareInterstitial({adId:Ads.unitIdIOS}).then(function(){Ads.ready=true;Ads.loading=null;res(true)}).catch(function(){Ads.ready=false;Ads.loading=null;res(false)})}
+      catch(e){Ads.ready=false;Ads.loading=null;res(false)}
+    });
+    return Ads.loading;
   },
   // 「もう一回投げる！」で呼ぶ。広告を出し、閉じてから next() を実行する。広告が無い・出せない時は next() だけ実行
   showThen:function(next){
     var A=Ads.plugin();
-    if(!A||!Ads.ready){Ads.prepare();next();return}
-    Ads.pending=next;
-    try{A.showInterstitial().catch(function(){Ads.done()})}catch(e){Ads.done();return}
-    // 念のための保険：60秒たっても閉じるイベントが来なければ先へ進める
-    setTimeout(function(){if(Ads.pending===next)Ads.done()},60000);
+    if(!A){next();return}
+    function show(){
+      if(!Ads.ready){next();Ads.prepare();return}
+      Ads.pending=next;
+      try{A.showInterstitial().catch(function(){Ads.done()})}catch(e){Ads.done();return}
+      // 念のための保険：60秒たっても閉じるイベントが来なければ先へ進める
+      setTimeout(function(){if(Ads.pending===next)Ads.done()},60000);
+    }
+    if(Ads.ready){show();return}
+    var t=setTimeout(function(){t=null;next()},5000);
+    Ads.prepare().then(function(){if(t){clearTimeout(t);t=null;show()}});
   }
 };
 
