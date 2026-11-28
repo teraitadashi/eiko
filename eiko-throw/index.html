@@ -280,7 +280,6 @@ function ensureAC(){if(!AC){try{var A=window.AudioContext||window.webkitAudioCon
 function unlock(){
   ensureAC();
   if(!unlocked&&bgm){unlocked=true;try{bgm.muted=true;var p=bgm.play();if(p&&p.then)p.then(function(){if(!musicOn){bgm.pause();bgm.currentTime=0}bgm.muted=false},function(){bgm.muted=false});else{bgm.pause();bgm.muted=false}}catch(e){bgm.muted=false}}
-  if(window.speechSynthesis){try{speechSynthesis.getVoices()}catch(e){}}
 }
 function playMusic(){if(!data.music||!bgm)return;musicOn=true;try{bgm.muted=false;bgm.currentTime=0;var p=bgm.play();if(p&&p.catch)p.catch(function(){setTimeout(function(){if(musicOn&&bgm.paused){try{var q=bgm.play();if(q&&q.catch)q.catch(function(){})}catch(e){}}},400)})}catch(e){}}
 function stopMusic(){musicOn=false;if(!bgm)return;try{bgm.pause();bgm.currentTime=0}catch(e){}}
@@ -298,7 +297,7 @@ function windStop(){if(wind){try{wind.s.stop()}catch(e){}wind=null}}
 function fanfare(){var n=[523,659,784,1047,784,1047,1319];for(var i=0;i<n.length;i++)tone(n[i],i===n.length-1?0.6:0.16,'square',0.07,null,i*0.09)}
 function ding(){tone(1318,0.25,'triangle',0.15);tone(1760,0.35,'triangle',0.12,null,0.08)}
 function popS(){tone(520,0.25,'sine',0.3,180);tone(900,0.15,'triangle',0.15,1400,0.05)}
-function say(t){if(!data.voice||!window.speechSynthesis)return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.pitch=1.6;u.rate=1.1;u.volume=1;var vs=speechSynthesis.getVoices()||[];for(var i=0;i<vs.length;i++){if(/ja/i.test(vs[i].lang)){u.voice=vs[i];break}}speechSynthesis.speak(u)}catch(e){}}
+function say(t){/* 読み上げは音楽を中断するため使わない */}
 
 /* ===== パーティクル ===== */
 var parts=[],shake=0;
@@ -607,8 +606,8 @@ function showResult(){
   $('bShare').onclick=function(){var t='「えいこを投げ飛ばしました」で、えいこを'+landInfo.flag+landInfo.country+(landInfo.land?'（'+landInfo.city+'付近）':'')+'まで '+fmt(distKm)+'km 投げ飛ばしました！【'+rankOf(distKm)+'】';Platform.share(t).then(function(r){if(r==='copied')toast('結果をコピーしました！');else if(r==='fail')toast('シェアできませんでした')})};
   $('bStamp2').onclick=openStamps;
 }
-function startSpin(){stopMusic();try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}parts=[];$('result').classList.add('hide');$('title').classList.add('hide');$('bGear').classList.remove('hide');holding=false;power=0;go('spin')}
-function toTitle(){stopMusic();holding=false;windStop();parts=[];shake=0;popups=[];flyers=[];try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}$('modal').classList.add('hide');$('bGear').classList.remove('hide');$('result').classList.add('hide');$('title').classList.remove('hide');updBest();go('title')}
+function startSpin(){stopMusic();parts=[];$('result').classList.add('hide');$('title').classList.add('hide');$('bGear').classList.remove('hide');holding=false;power=0;go('spin')}
+function toTitle(){stopMusic();holding=false;windStop();parts=[];shake=0;popups=[];flyers=[];$('modal').classList.add('hide');$('bGear').classList.remove('hide');$('result').classList.add('hide');$('title').classList.remove('hide');updBest();go('title')}
 
 /* ===== UI ===== */
 var toastTm=null;function toast(s){var t=$('toast');t.textContent=s;t.classList.add('show');clearTimeout(toastTm);toastTm=setTimeout(function(){t.classList.remove('show')},2200)}
@@ -629,7 +628,6 @@ function openHow(){modal('❓ あそびかた','<ol class="howto"><li>画面を<
 function openSettings(){
   var h='<div class="set">'+
   '<div class="tog">🎵 音楽<button id="tM" class="'+(data.music?'on':'off')+'">'+(data.music?'オン':'オフ')+'</button></div>'+
-  '<div class="tog">🗣 投げたときの声<button id="tV" class="'+(data.voice?'on':'off')+'">'+(data.voice?'オン':'オフ')+'</button></div>'+
   '<button class="btn sub" id="sHow">❓ あそびかた</button>'+
   '<p><b>データの引継ぎ</b>：記録はこのブラウザだけに保存されます。別のブラウザや端末に移すときは、片方で「コピーして保存」→ もう片方で「貼り付けて復元」。同期はされません。</p>'+
   '<button class="btn sub" id="sCopy">📋 コピーして保存</button><button class="btn sub" id="sPaste">📥 貼り付けて復元</button>'+
@@ -637,7 +635,6 @@ function openSettings(){
   '<button class="btn sub" id="sReset" style="background:#b0124f">🗑 記録をリセット</button></div>';
   modal('⚙︎ 設定',h);
   $('tM').onclick=function(){data.music=!data.music;saveData();if(!data.music)stopMusic();else if(scene==='result'||scene==='globe'||scene==='land')playMusic();openSettings()};
-  $('tV').onclick=function(){data.voice=!data.voice;saveData();openSettings()};
   $('sHow').onclick=openHow;
   $('sTitle').onclick=function(){$('modal').classList.add('hide');toTitle()};
   $('sCopy').onclick=function(){var s=JSON.stringify(data);Platform.copy(s).then(function(ok){if(ok)toast('コピーしました。メモ等に貼り付けて保管してください');else{modal('📋 コピーして保存','<p style="font-size:14px">下の文字をすべて選択してコピーしてください。</p><textarea readonly>'+s.replace(/</g,'&lt;')+'</textarea>')}})};
