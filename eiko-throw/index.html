@@ -282,7 +282,7 @@ function unlock(){
   if(!unlocked&&bgm){unlocked=true;try{bgm.muted=true;var p=bgm.play();if(p&&p.then)p.then(function(){if(!musicOn){bgm.pause();bgm.currentTime=0}bgm.muted=false},function(){bgm.muted=false});else{bgm.pause();bgm.muted=false}}catch(e){bgm.muted=false}}
   if(window.speechSynthesis){try{speechSynthesis.getVoices()}catch(e){}}
 }
-function playMusic(){if(!data.music||!bgm)return;musicOn=true;try{bgm.muted=false;bgm.currentTime=0;var p=bgm.play();if(p&&p.catch)p.catch(function(){})}catch(e){}}
+function playMusic(){if(!data.music||!bgm)return;musicOn=true;try{bgm.muted=false;bgm.currentTime=0;var p=bgm.play();if(p&&p.catch)p.catch(function(){setTimeout(function(){if(musicOn&&bgm.paused){try{var q=bgm.play();if(q&&q.catch)q.catch(function(){})}catch(e){}}},400)})}catch(e){}}
 function stopMusic(){musicOn=false;if(!bgm)return;try{bgm.pause();bgm.currentTime=0}catch(e){}}
 function tone(f,dur,type,vol,slide,delay){
   if(!AC)return;try{var t0=AC.currentTime+(delay||0),o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.setValueAtTime(f,t0);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+dur);
@@ -437,7 +437,7 @@ function update(dt){
     if(Math.random()<dt*25){spark(W/2+(Math.random()-.5)*10,H*0.5,1,70*U)}
     if(st>=flightD+0.25){go('land');popups=[]}
   }else if(scene==='land'){
-    if(st>2.0&&!landed){landed=true;popS();Platform.haptic(40);confetti(110,W/2,H*0.5,520*U);shake=0.5}
+    if(st>2.0&&!landed){landed=true;stopMusic();popS();Platform.haptic(40);confetti(110,W/2,H*0.5,520*U);shake=0.5}
     if(st>2.5&&!shown){shown=true;showResult()}
   }else if(scene==='result'){
     if(Math.random()<dt*3)confetti(3,Math.random()*W,-10,60*U);
@@ -589,6 +589,7 @@ function throwIt(){
   $('bGear').classList.add('hide');
 }
 function showResult(){
+  stopMusic();
   go('result');
   data.plays++;var key=landInfo.land?landInfo.country:landInfo.country;
   var stp=data.stamps[key]||{f:landInfo.flag,n:0,b:0};stp.n++;if(distKm>stp.b)stp.b=Math.round(distKm);data.stamps[key]=stp;
