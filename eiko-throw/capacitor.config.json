@@ -5,6 +5,7 @@
   "ios": {
     "contentInset": "never",
     "scheme": "App",
-    "preferredContentMode": "mobile"
+    "preferredContentMode": "mobile",
+    "scrollEnabled": false
   }
 }

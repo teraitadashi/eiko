@@ -116,7 +116,7 @@ var Ads={
   ready:false,pending:null,
   plugin:function(){try{return(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AdMob)||null}catch(e){return null}},
   // 閉じた（または失敗した）ときに、待っている処理（次のゲーム開始）を1回だけ実行する
-  done:function(){var f=Ads.pending;Ads.pending=null;Ads.ready=false;Ads.prepare();if(f)f()},
+  done:function(){var f=Ads.pending;Ads.pending=null;Ads.ready=false;Ads.prepare();if(typeof keepTop==='function')keepTop();if(f)f()},
   init:function(){
     var A=Ads.plugin();if(!A)return;
     try{
@@ -232,6 +232,10 @@ function resize(){
 function bgStop(){stopMusic();try{if(AC&&AC.state==='running')AC.suspend()}catch(e){}}
 document.addEventListener('visibilitychange',function(){if(document.hidden)bgStop()});
 window.addEventListener('pagehide',bgStop);
+// 画面が上にずれて上端が切れることがあるため、ずれたら毎回元に戻す
+function keepTop(){try{window.scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}catch(e){}}
+window.addEventListener('scroll',keepTop);
+document.addEventListener('visibilitychange',function(){if(!document.hidden){keepTop();resize()}});
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200)});
 
 /* ===== WebGL 地球 ===== */
