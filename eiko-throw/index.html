@@ -2,7 +2,7 @@
 
 <title>えいこを投げ飛ばしました</title>
 <style>
-:root{--sat:0px;--sab:0px;--pink:#ff4f9a;--gold:#ffd23f}
+:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--pink:#ff4f9a;--gold:#ffd23f}
 html,body{margin:0;padding:0;width:100%;height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%;background:#0b1a3a}
 body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;color:#fff;-webkit-touch-callout:none}
 #cv{position:fixed;left:0;top:0;width:100%;height:100%;touch-action:none;display:block}
@@ -111,12 +111,18 @@ var Platform={
 
 /* ===== 広告（1ゲームごと・結果カード表示後に全画面広告）。アプリ版はCapacitor AdMobプラグインで動作。Webブラウザでは何もしない ===== */
 var Ads={
-  // Googleの公式テスト用ユニットID（iOS：インタースティシャル）。公開前に本番のユニットIDへ差し替える
+  // Googleの公式テスト用ユニットID（iOS：インタースティシャル）。審査提出の直前に本番IDへ差し替える
   unitIdIOS:'ca-app-pub-3940256099942544/4411468910',
-  ready:false,busy:false,
+  ready:false,pending:null,
   plugin:function(){try{return(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.AdMob)||null}catch(e){return null}},
+  // 閉じた（または失敗した）ときに、待っている処理（次のゲーム開始）を1回だけ実行する
+  done:function(){var f=Ads.pending;Ads.pending=null;Ads.ready=false;Ads.prepare();if(f)f()},
   init:function(){
     var A=Ads.plugin();if(!A)return;
+    try{
+      A.addListener('interstitialAdDismissed',function(){Ads.done()});
+      A.addListener('interstitialAdFailedToShow',function(){Ads.done()});
+    }catch(e){}
     // ATT（トラッキング許可）を先に聞いてから広告を準備する（許可・拒否どちらでも広告は出る）
     try{A.initialize({}).then(function(){
       return A.requestTrackingAuthorization().catch(function(){});
@@ -126,14 +132,14 @@ var Ads={
     var A=Ads.plugin();if(!A)return;
     try{A.prepareInterstitial({adId:Ads.unitIdIOS}).then(function(){Ads.ready=true}).catch(function(){Ads.ready=false})}catch(e){Ads.ready=false}
   },
-  // 結果カードが表示された後に1回だけ出す（ゲーム開始時やタイトル時には出さない）
-  afterGame:function(){
-    var A=Ads.plugin();if(!A||!Ads.ready||Ads.busy)return;
-    Ads.busy=true;
-    setTimeout(function(){
-      try{stopMusic();A.showInterstitial().then(function(){},function(){}).then(function(){Ads.busy=false;Ads.ready=false;Ads.prepare()})}
-      catch(e){Ads.busy=false}
-    },900);
+  // 「もう一回投げる！」で呼ぶ。広告を出し、閉じてから next() を実行する。広告が無い・出せない時は next() だけ実行
+  showThen:function(next){
+    var A=Ads.plugin();
+    if(!A||!Ads.ready){Ads.prepare();next();return}
+    Ads.pending=next;
+    try{A.showInterstitial().catch(function(){Ads.done()})}catch(e){Ads.done();return}
+    // 念のための保険：60秒たっても閉じるイベントが来なければ先へ進める
+    setTimeout(function(){if(Ads.pending===next)Ads.done()},60000);
   }
 };
 
@@ -596,10 +602,9 @@ function showResult(){
   '<div class="msg">えいこ「'+msg+'」<br><small>えいこ「たのしかった〜！もう1回とばして♪」</small></div>'+
   '<div class="bottom"><button class="btn main" id="bAgain">もう一回投げる！</button><div class="row"><button class="btn gold" id="bShare">📣 シェア</button><button class="btn sub" id="bStamp2">🗺 スタンプ帳</button></div></div>';
   $('result').classList.remove('hide');$('bGear').classList.remove('hide');
-  $('bAgain').onclick=function(){unlock();startSpin()};
+  $('bAgain').onclick=function(){unlock();Ads.showThen(function(){startSpin()})};
   $('bShare').onclick=function(){var t='「えいこを投げ飛ばしました」で、えいこを'+landInfo.flag+landInfo.country+(landInfo.land?'（'+landInfo.city+'付近）':'')+'まで '+fmt(distKm)+'km 投げ飛ばしました！【'+rankOf(distKm)+'】';Platform.share(t).then(function(r){if(r==='copied')toast('結果をコピーしました！');else if(r==='fail')toast('シェアできませんでした')})};
   $('bStamp2').onclick=openStamps;
-  Ads.afterGame();
 }
 function startSpin(){stopMusic();try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}parts=[];$('result').classList.add('hide');$('title').classList.add('hide');$('bGear').classList.remove('hide');holding=false;power=0;go('spin')}
 function toTitle(){stopMusic();holding=false;windStop();parts=[];shake=0;popups=[];flyers=[];try{if(window.speechSynthesis)speechSynthesis.cancel()}catch(e){}$('modal').classList.add('hide');$('bGear').classList.remove('hide');$('result').classList.add('hide');$('title').classList.remove('hide');updBest();go('title')}
