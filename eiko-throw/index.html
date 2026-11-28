@@ -2,7 +2,7 @@
 
 <title>えいこを投げ飛ばしました</title>
 <style>
-:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--pink:#ff4f9a;--gold:#ffd23f}
+:root{--sat:max(env(safe-area-inset-top,0px),59px);--sab:env(safe-area-inset-bottom,0px);--pink:#ff4f9a;--gold:#ffd23f}
 html,body{margin:0;padding:0;width:100%;height:100%;height:100dvh;overflow:hidden;overscroll-behavior:none;-webkit-text-size-adjust:100%;background:#0b1a3a}
 body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;color:#fff;-webkit-touch-callout:none}
 #cv{position:fixed;left:0;top:0;width:100%;height:100%;touch-action:none;display:block}
@@ -212,7 +212,7 @@ var gc=document.createElement('canvas'),gl=null,GLP=null,GDPR=1;
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth||430;H=window.innerHeight||932;
   cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);
-  var cs=getComputedStyle($('sa'));SAT=parseFloat(cs.paddingTop)||0;SAB=parseFloat(cs.paddingBottom)||0;
+  var cs=getComputedStyle($('sa'));SAT=Math.max(parseFloat(cs.paddingTop)||0,59);SAB=parseFloat(cs.paddingBottom)||0;
   U=Math.min(W/430,H/800);
   GDPR=Math.min(DPR,2);gc.width=Math.round(W*GDPR);gc.height=Math.round(H*GDPR);
   if(gl)gl.viewport(0,0,gc.width,gc.height);
@@ -646,7 +646,7 @@ function openSettings(){
   var armed=false;$('sReset').onclick=function(){if(!armed){armed=true;this.textContent='もう一度押すとリセットします';return}data={v:1,best:0,bestPlace:'',plays:0,stamps:{},music:data.music,voice:data.voice};saveData();updBest();$('modal').classList.add('hide');toast('リセットしました')};
 }
 $('bGear').onclick=function(){if(holding)return;openSettings()};
-$('bHome').onclick=function(){toTitle()};
+$('bHome').onclick=function(){if(scene==='result'){Ads.showThen(function(){toTitle()})}else{toTitle()}};
 $('bStart').onclick=function(){unlock();startSpin()};
 $('bStamp').onclick=openStamps;$('bHow').onclick=openHow;
 
