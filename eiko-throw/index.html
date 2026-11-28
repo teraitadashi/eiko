@@ -217,6 +217,10 @@ function resize(){
   GDPR=Math.min(DPR,2);gc.width=Math.round(W*GDPR);gc.height=Math.round(H*GDPR);
   if(gl)gl.viewport(0,0,gc.width,gc.height);
 }
+// 他のアプリに切り替えた（バックグラウンドへ行った）ら音楽を止める
+function bgStop(){stopMusic();try{if(AC&&AC.state==='running')AC.suspend()}catch(e){}}
+document.addEventListener('visibilitychange',function(){if(document.hidden)bgStop()});
+window.addEventListener('pagehide',bgStop);
 window.addEventListener('resize',resize);window.addEventListener('orientationchange',function(){setTimeout(resize,200)});
 
 /* ===== WebGL 地球 ===== */
